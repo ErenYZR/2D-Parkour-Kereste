@@ -87,7 +87,7 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-		if (Input.GetKeyDown(KeyCode.Space) && !onWall()) // zýplama
+		if (Input.GetKeyDown(KeyCode.Space) && !(onWall() && Input.GetKey(KeyCode.Mouse0))) // zýplama
 			{ 
                 Jump();				
 			} 
