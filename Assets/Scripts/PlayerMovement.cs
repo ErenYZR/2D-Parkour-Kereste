@@ -7,12 +7,14 @@ public class PlayerMovement : MonoBehaviour
 {
     public LayerMask groundLayer;
 	public LayerMask wallLayer;
+
+	private Rigidbody2D body;
+	private Animator anim;
+	private BoxCollider2D boxCollider;
+	private TrailRenderer trailRenderer;
+
 	public float speed;
 	public float jumpPower;
-	private Rigidbody2D body;
-    private Animator anim;
-    private BoxCollider2D boxCollider;
-    private TrailRenderer trailRenderer;
     private float horizontalInput;
     private float verticalInput;
     private float jumpcount;
@@ -71,7 +73,6 @@ public class PlayerMovement : MonoBehaviour
         anim.SetBool("jump", !isGrounded());
         anim.SetBool("dash",whileDashing());
 
-         //   body.gravityScale = 5; //yer çekimi ayarlama
 
 
         //dash atmazkenki hareket
@@ -82,9 +83,19 @@ public class PlayerMovement : MonoBehaviour
         else if(isDashing)//dash atarkenki hareket
         {
             body.velocity = new Vector2(0, 0);
-            body.velocity = new Vector2(dashingDir.x,dashingDir.y).normalized*dashingVelocity;
+            if(dashingDir.x == 0 && dashingDir.y > 0)
+            {
+				body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity*3/4;
+			}
+            else if(dashingDir.x != 0 && dashingDir.y == 0)
+            {
+				body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 5/4;
+			}
+            else 
+            {
+				body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
+			}            
         }
-
 
 
 		if (Input.GetKeyDown(KeyCode.Space) && !(onWall() && Input.GetKey(KeyCode.Mouse0))) // zýplama
@@ -112,11 +123,17 @@ public class PlayerMovement : MonoBehaviour
         dashingCooldown += Time.deltaTime;
 
 
-       // if (onWall()) print("S");
+
         if (Input.GetKey(KeyCode.Mouse0) && onWall())
         {
             Climb();
-        }
+
+			if (Input.GetKeyDown(KeyCode.Space))//tutunurken zýplama
+			{
+				body.gravityScale = 5;
+				body.velocity = new Vector2(-Mathf.Sign(body.transform.localScale.x) * 30, 10);//YARDIM
+			}
+		}
         else
         {
             body.gravityScale = 5;
@@ -172,13 +189,7 @@ public class PlayerMovement : MonoBehaviour
 		body.velocity = new Vector2(body.velocity.x, 0);
 		body.gravityScale = 0;
 		body.velocity = new Vector2 (body.velocity.x, verticalInput*climbSpeed);
-
-		/*if (Input.GetKeyDown(KeyCode.Space))
-        {
-            body.velocity = new Vector2(-Mathf.Sign(transform.localRotation.x)*30,50);//YARDIM
-        }
-        */
-
+     
 	}
 
 
