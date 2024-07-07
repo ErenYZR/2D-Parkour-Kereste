@@ -67,7 +67,7 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
 
-        if (isClimbing()) print("A");
+        if (isClimbing()) print("Týrmanýyor");
         if (onWall()) print("Duvarda");
 
 
