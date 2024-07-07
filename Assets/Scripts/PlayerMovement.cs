@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
     private float wallJumpingTime = 0.2f;
     private float wallJumpingCounter;
     private float wallJumpingDuration = 0.2f;
-    private Vector2 wallJumpingPower = new Vector2(24f, 12f);
+    private Vector2 wallJumpingPower = new Vector2(2f, 3f);
 
 
 
@@ -69,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isClimbing()) print("Týrmanýyor");
         if (onWall()) print("Duvarda");
+        if (isGrounded()) print("Yerde");
 
 
         horizontalInput = Input.GetAxis("Horizontal");
@@ -92,8 +93,9 @@ public class PlayerMovement : MonoBehaviour
 
         
         //dash atmazkenki hareket
-        if (!isDashing && !onWall())
+        if (!isDashing && !onWall() && horizontalInput != 0)
         {
+            new WaitForSeconds(2);
 			body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
 		}
         else if(isDashing)//dash atarkenki hareket
@@ -113,7 +115,7 @@ public class PlayerMovement : MonoBehaviour
 			}            
         }
 
-
+        print("Jump counter:" + jumpcount);
 
         if (isGrounded()) //yere düþünce jumpcount sýfýrlama
             {
@@ -192,12 +194,21 @@ public class PlayerMovement : MonoBehaviour
     {
 
 
-        if (isClimbing())
+        if (isClimbing() && (Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f))
         {
-            body.velocity = new Vector2(body.velocity.x, 0);
-            body.gravityScale = 0;
-            body.velocity = new Vector2(body.velocity.x, verticalInput * climbSpeed);
-        }
+
+			isWallJumping = true;
+			body.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
+            print("Wall Jumping Direction:"+ wallJumpingDirection * wallJumpingPower.x+","+wallJumpingPower.y);
+			wallJumpingCounter = 0f;
+
+		}		    
+        else if (isClimbing())
+        {
+			body.velocity = new Vector2(body.velocity.x, 0);
+			body.gravityScale = 0;
+			body.velocity = new Vector2(body.velocity.x, verticalInput * climbSpeed);
+		}
         else
         {
             body.gravityScale = 5;
@@ -224,7 +235,7 @@ public class PlayerMovement : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f)
         {
             isWallJumping = true;
-            body.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x*3, wallJumpingPower.y);
+            body.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x * 2, wallJumpingPower.y*3);
             wallJumpingCounter = 0f;
 
 
