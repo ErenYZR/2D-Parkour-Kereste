@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95e66c6366d904e98bc83428217d4fd7, type: 3}
+  m_Name: Script Graph
+  m_EditorClassIdentifier: 
+  _data:
+    _json: '{"graph":{"variables":{"Kind":"Flow","collection":{"$content":[],"$version":"A"},"$version":"A"},"controlInputDefinitions":[],"controlOutputDefinitions":[],"valueInputDefinitions":[],"valueOutputDefinitions":[],"title":null,"summary":null,"pan":{"x":0.0,"y":0.0},"zoom":1.0,"elements":[{"coroutine":false,"defaultValues":{},"position":{"x":-204.0,"y":-144.0},"guid":"25d3d41a-1ebe-4d40-8867-28dcbf027e65","$version":"A","$type":"Unity.VisualScripting.Start"},{"coroutine":false,"defaultValues":{},"position":{"x":-204.0,"y":60.0},"guid":"4eaf370d-f366-4131-a375-ad407d1baec1","$version":"A","$type":"Unity.VisualScripting.Update"},{"chainable":false,"parameterNames":["center","halfExtents","direction","hitInfo","orientation","maxDistance","layerMask","queryTriggerInteraction"],"member":{"name":"BoxCast","parameterTypes":["UnityEngine.Vector3","UnityEngine.Vector3","UnityEngine.Vector3","UnityEngine.RaycastHit&","UnityEngine.Quaternion","System.Single","System.Int32","UnityEngine.QueryTriggerInteraction"],"targetType":"UnityEngine.Physics","targetTypeName":"UnityEngine.Physics","$version":"A"},"defaultValues":{"%center":{"x":0.0,"y":0.0,"z":0.0,"$type":"UnityEngine.Vector3"},"%halfExtents":{"x":0.0,"y":0.0,"z":0.0,"$type":"UnityEngine.Vector3"},"%direction":{"x":0.0,"y":0.0,"z":0.0,"$type":"UnityEngine.Vector3"},"%maxDistance":{"$content":0.0,"$type":"System.Single"},"%layerMask":{"$content":0,"$type":"System.Int32"},"%queryTriggerInteraction":{"$content":"UseGlobal","$type":"UnityEngine.QueryTriggerInteraction"}},"position":{"x":-55.0,"y":-131.0},"guid":"6eecbc87-effe-4984-b14a-d488748f5beb","$version":"A","$type":"Unity.VisualScripting.InvokeMember"}],"$version":"A"}}'
+    _objectReferences: []

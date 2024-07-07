@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 
@@ -13,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
 	private BoxCollider2D boxCollider;
 	private TrailRenderer trailRenderer;
 
+    [SerializeField] private BoxCollider2D climb;
 	public float speed;
 	public float jumpPower;
     private float horizontalInput;
@@ -21,6 +23,7 @@ public class PlayerMovement : MonoBehaviour
     private float isGroundedCooldowntimer;
     private float timer;
     [SerializeField] float climbSpeed = 3f;
+ 
 
     //dash variables
     [SerializeField] private float dashingVelocity;
@@ -30,6 +33,18 @@ public class PlayerMovement : MonoBehaviour
     private bool isDashing;
     private bool canDash = true;
     private bool canDashCondition;
+
+
+    //wall jump
+    private bool isWallJumping;
+    private float wallJumpingDirection;
+    private float wallJumpingTime = 0.2f;
+    private float wallJumpingCounter;
+    private float wallJumpingDuration = 0.2f;
+    private Vector2 wallJumpingPower = new Vector2(24f, 12f);
+
+
+
 
 
 	private void Awake()
@@ -52,8 +67,18 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
 
+        if (isClimbing()) print("A");
+        if (onWall()) print("Duvarda");
+
+
         horizontalInput = Input.GetAxis("Horizontal");
         verticalInput = Input.GetAxis("Vertical");
+
+		//animatör parametrelerini ayarlama kýsmý
+		anim.SetBool("run", horizontalInput != 0 && isGrounded());
+		anim.SetBool("grounded", isGrounded());
+		anim.SetBool("jump", !isGrounded());
+		anim.SetBool("dash", whileDashing());
 
 		//Oyuncunun saða sola dönme animasyonu
 		if (horizontalInput > 0.01f)
@@ -66,17 +91,8 @@ public class PlayerMovement : MonoBehaviour
         }
 
         
-
-        //animatör parametrelerini ayarlama kýsmý
-        anim.SetBool("run",horizontalInput !=0 && isGrounded());
-        anim.SetBool("grounded", isGrounded());
-        anim.SetBool("jump", !isGrounded());
-        anim.SetBool("dash",whileDashing());
-
-
-
         //dash atmazkenki hareket
-        if (!isDashing)
+        if (!isDashing && !onWall())
         {
 			body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
 		}
@@ -98,11 +114,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
 
-		if (Input.GetKeyDown(KeyCode.Space) && !(onWall() && Input.GetKey(KeyCode.Mouse0))) // zýplama
-			{ 
-                Jump();				
-			} 
-
 
         if (isGrounded()) //yere düþünce jumpcount sýfýrlama
             {
@@ -123,31 +134,24 @@ public class PlayerMovement : MonoBehaviour
         dashingCooldown += Time.deltaTime;
 
 
-
-        if (Input.GetKey(KeyCode.Mouse0) && onWall())
-        {
-            Climb();
-
-			if (Input.GetKeyDown(KeyCode.Space))//tutunurken zýplama
-			{
-				body.gravityScale = 5;
-				body.velocity = new Vector2(-Mathf.Sign(body.transform.localScale.x) * 30, 10);//YARDIM
-			}
-		}
-        else
-        {
-            body.gravityScale = 5;
-        }
+		Jump();
+		Climb();
+		WallJump();
 	}
 
     //zýplama kodu
     private void Jump()
     {
-        if (jumpcount > 0)
+		if (Input.GetKeyDown(KeyCode.Space) && !(onWall() && Input.GetKey(KeyCode.Mouse0))) 
         {
-			body.velocity = new Vector2(body.velocity.x, jumpPower);
-			jumpcount--;  
-        }
+			if (jumpcount > 0)
+			{
+				body.velocity = new Vector2(body.velocity.x, jumpPower);
+				print("Zýpladý");
+				jumpcount--;
+			}
+		}
+		
     }
 
     private void Dash()
@@ -186,30 +190,88 @@ public class PlayerMovement : MonoBehaviour
     //duvara týrmanma
     private void Climb()
     {
-		body.velocity = new Vector2(body.velocity.x, 0);
-		body.gravityScale = 0;
-		body.velocity = new Vector2 (body.velocity.x, verticalInput*climbSpeed);
-     
+
+
+        if (isClimbing())
+        {
+            body.velocity = new Vector2(body.velocity.x, 0);
+            body.gravityScale = 0;
+            body.velocity = new Vector2(body.velocity.x, verticalInput * climbSpeed);
+        }
+        else
+        {
+            body.gravityScale = 5;
+        }
 	}
+
+
+    //duvarda zýplama
+    private void WallJump()
+    {
+        if (isClimbing())
+        {
+            isWallJumping = false;
+            wallJumpingDirection = -transform.localScale.x;
+            wallJumpingCounter = wallJumpingTime;
+
+            CancelInvoke(nameof(StopWallJumping));
+        }
+        else
+        {
+            wallJumpingCounter -= Time.deltaTime;
+        }
+
+        if(Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f)
+        {
+            isWallJumping = true;
+            body.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x*3, wallJumpingPower.y);
+            wallJumpingCounter = 0f;
+
+
+            print("Duvarda zýpladý");
+        }
+
+        Invoke(nameof(StopWallJumping), wallJumpingDuration);
+
+    }
+
+
+    private void StopWallJumping()
+    {
+
+        isWallJumping = false;
+    }
 
 
     //yerde mi
     private bool isGrounded()
     {
-        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center,boxCollider.bounds.size,0,Vector2.down,0.1f,groundLayer);
+        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center,boxCollider.bounds.size*0.5f,0,Vector2.down,0.5f,groundLayer);
+
+      
         return raycastHit.collider != null;
     }
 
     //duvarda mý
 	private bool onWall()
 	{
-		RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x,0), 0.1f, groundLayer);//wall layer
+		RaycastHit2D raycastHit = Physics2D.BoxCast(climb.bounds.center, boxCollider.bounds.size*0.5f, 0, new Vector2(transform.localScale.x,0), 0.2f, groundLayer);//wall layer
 		return raycastHit.collider != null;
 
 	}
 
-    //saldýrý
-    public bool canAttack()
+	private void OnDrawGizmos()
+	{
+        Gizmos.DrawCube(climb.bounds.center, boxCollider.bounds.size * 0.5f);
+		Gizmos.DrawCube(climb.bounds.center + Vector3.down*0.5f, boxCollider.bounds.size * 0.5f);
+
+       // Gizmos.DrawCube(boxCollider.bounds.center, boxCollider.bounds.size * 0.5f);
+		//Gizmos.DrawCube(boxCollider.bounds.center + new Vector3(transform.localScale.x,0,0)*0.5f, boxCollider.bounds.size * 0.5f);
+	}
+
+
+	//saldýrý
+	public bool canAttack()
     {
 
         return horizontalInput == 0 && isGrounded() && !onWall();
@@ -218,6 +280,11 @@ public class PlayerMovement : MonoBehaviour
     public bool whileDashing()
     {
         return isDashing;
+    }
+
+    public bool isClimbing()
+    {
+        return (Input.GetKey(KeyCode.Mouse0) && onWall());
     }
 
 
