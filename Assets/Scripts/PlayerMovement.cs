@@ -23,6 +23,7 @@ public class PlayerMovement : MonoBehaviour
     private float isGroundedCooldowntimer;
     private float timer;
     [SerializeField] float climbSpeed = 3f;
+    private bool doubleJump;
  
 
     //dash variables
@@ -93,9 +94,8 @@ public class PlayerMovement : MonoBehaviour
 
         
         //dash atmazkenki hareket
-        if (!isDashing && !onWall() && horizontalInput != 0)
+        if (!isDashing && !onWall())
         {
-            new WaitForSeconds(2);
 			body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
 		}
         else if(isDashing)//dash atarkenki hareket
