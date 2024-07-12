@@ -79,8 +79,8 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded()) print("Yerde");
 
 
-        horizontalInput = Input.GetAxis("Horizontal");
-        verticalInput = Input.GetAxis("Vertical");
+        horizontalInput = Input.GetAxisRaw("Horizontal");
+        verticalInput = Input.GetAxisRaw("Vertical");
 
 		//animatör parametrelerini ayarlama kýsmý
 		anim.SetBool("run", horizontalInput != 0 && isGrounded());
@@ -98,24 +98,26 @@ public class PlayerMovement : MonoBehaviour
             transform.localScale = new Vector3(-1,1,1);
         }
 
-        acceleration = maxSpeed-Mathf.Abs(body.velocity.x);
+	/*	if (horizontalInput == 0)
+		{
+			body.velocity = new Vector2(body.velocity.x/100, body.velocity.y);
+			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+		}
+
+		acceleration = maxSpeed-Mathf.Abs(body.velocity.x);
         hýz = body.velocity.x;
-        if (Mathf.Abs(body.velocity.x) < maxSpeed && (horizontalInput*body.velocity.x>=0))
+        if (Mathf.Abs(body.velocity.x) < maxSpeed && ((horizontalInput*body.velocity.x>0) || (horizontalInput * body.velocity.x == 0 && horizontalInput !=0)))
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration* horizontalInput),body.velocity.y);
         }
 
         if(horizontalInput*body.velocity.x < 0)
         {
-			body.velocity = new Vector2(body.velocity.x - (body.velocity.x /5), body.velocity.y);
+			body.velocity = new Vector2(body.velocity.x - (body.velocity.x *9/10), body.velocity.y);
             if(body.velocity.x < 0.1f) body.velocity = new Vector2(0,body.velocity.y);
-		}
+		}*/
 
-        if(horizontalInput == 0)
-        {
-            body.velocity = new Vector2(body.velocity.x *1/5, body.velocity.y);
-			if (body.velocity.x < 3f) body.velocity = new Vector2(0, body.velocity.y);
-		}
+
 
 
 
@@ -123,7 +125,7 @@ public class PlayerMovement : MonoBehaviour
 
 
 		//dash atmazkenki hareket
-		/* if (!isDashing && !onWall() && !isWallJumping)
+		 if (!isDashing && !onWall() && !isWallJumping)
 		 {
 			 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
 		 }
@@ -149,7 +151,7 @@ public class PlayerMovement : MonoBehaviour
 			 new WaitForSeconds(1f);
 			 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
 
-		 }*/
+		 }
 
 		if (isGrounded()) //yere düþünce jumpcount sýfýrlama
             {
