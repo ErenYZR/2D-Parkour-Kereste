@@ -236,7 +236,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
     //zýplama kodu
-  /*  private void Jump()
+    private void Jump()
     {
 		if (Input.GetKeyDown(KeyCode.Space) && !(onWall() && Input.GetKey(KeyCode.Mouse0))) 
         {
@@ -249,10 +249,10 @@ public class PlayerMovement : MonoBehaviour
 			}
 		}
 		
-    }*/
+    }
 
 
-    private void Jump()
+  /*  private void Jump()
     {
 		if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && isGrounded() && groundJumpCounter > 0 && !isWallJumping)
         {
@@ -266,7 +266,7 @@ public class PlayerMovement : MonoBehaviour
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
             airJumpCounter--;
 		}
-	}
+	}*/
 
     private void Dash()
     {   
@@ -430,7 +430,7 @@ public class PlayerMovement : MonoBehaviour
     //duvarda mý
 	private bool onWall()
 	{
-		RaycastHit2D raycastHit = Physics2D.BoxCast(climb.bounds.center, boxCollider.bounds.size*0.7f, 0, new Vector2(transform.localScale.x,0), 0.2f, wallLayer);//wall layer
+		RaycastHit2D raycastHit = Physics2D.BoxCast(climb.bounds.center, boxCollider.bounds.size*0.7f, 0, new Vector2(transform.localScale.x,0), 0.2f, groundLayer);//wall layer
 		return raycastHit.collider != null;
 
 	}
