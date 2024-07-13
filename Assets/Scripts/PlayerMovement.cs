@@ -236,7 +236,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
     //zýplama kodu
-    private void Jump()
+  /*  private void Jump()
     {
 		if (Input.GetKeyDown(KeyCode.Space) && !(onWall() && Input.GetKey(KeyCode.Mouse0))) 
         {
@@ -249,10 +249,10 @@ public class PlayerMovement : MonoBehaviour
 			}
 		}
 		
-    }
+    }*/
 
 
-  /*  private void Jump()
+    private void Jump()
     {
 		if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && isGrounded() && groundJumpCounter > 0 && !isWallJumping)
         {
@@ -266,7 +266,7 @@ public class PlayerMovement : MonoBehaviour
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
             airJumpCounter--;
 		}
-	}*/
+	}
 
     private void Dash()
     {   
