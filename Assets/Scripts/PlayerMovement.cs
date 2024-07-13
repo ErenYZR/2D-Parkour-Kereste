@@ -46,13 +46,15 @@ public class PlayerMovement : MonoBehaviour
     //wall jump
     private bool isWallJumping;
     private float wallJumpingDirection;
-    private float wallJumpingTime = 4f;
+    private float wallJumpingTime = 1f;
     private float wallJumpingCounter;
-    private float wallJumpingDuration = 1f;
+    private float wallJumpingDuration = 0.1f;
     private Vector2 wallJumpingPower = new Vector2(2f, 3f);
+    private float wallJumpExpecter;
+	private float wallJumpExpecterTime =0.2f;
 
-    //hanging
-    private float hangingTime = 0.2f;
+	//hanging
+	private float hangingTime = 0.2f;
     private float hangingTimeCounter;
 
 	private void Awake()
@@ -111,17 +113,45 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-        if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput*body.velocity.x>0) || (horizontalInput * body.velocity.x == 0 && horizontalInput !=0)))
+        if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
         {
-			body.velocity = new Vector2(body.velocity.x + (acceleration* horizontalInput)/4,body.velocity.y);
+            body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
         }
-        else if(horizontalInput*body.velocity.x < 0 && !isWallJumping)
+        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping)
         {
-			body.velocity = new Vector2(body.velocity.x - (body.velocity.x /2), body.velocity.y);
-            if(body.velocity.x < 0.1f) body.velocity = new Vector2(0,body.velocity.y);
+            body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
+            if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+        }
+        else if (isDashing)//dash atarkenki hareket
+        {
+            body.velocity = new Vector2(0, 0);
+            if (dashingDir.x == 0 && dashingDir.y > 0)
+            {
+                body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 3 / 4;
+            }
+            else if (dashingDir.x != 0 && dashingDir.y == 0)
+            {
+                body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 5 / 4;
+            }
+            else
+            {
+                body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
+            }
+        }//dash atarken hareket
+
+
+
+		if (Mathf.Abs(body.velocity.x) < maxSpeed && isWallJumping && !isDashing && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
+		{
+			body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 12, body.velocity.y);
+		}
+		else if (horizontalInput * body.velocity.x < 0 && isWallJumping && !isDashing)
+		{
+			body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 4), body.velocity.y);
+			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 		}
 
-        if(body.velocity.y > 19)
+		if (body.velocity.y > 19)
         {
             body.velocity = new Vector2 (body.velocity.x, body.velocity.y-1);
         }
@@ -130,46 +160,51 @@ public class PlayerMovement : MonoBehaviour
 			body.velocity = new Vector2(body.velocity.x, body.velocity.y + 1);
 		}
 
-
-
-
+		if (body.velocity.x > 17)
+		{
+			body.velocity = new Vector2(body.velocity.x - 1, body.velocity.y);
+		}
+		else if (body.velocity.x < -17)
+		{
+			body.velocity = new Vector2(body.velocity.x + 1, body.velocity.y);
+		}
 
 
 		//dash atmazkenki hareket
-	/*	 if (!isDashing && !onWall() && !isWallJumping)
-		 {
-			 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
-		 }
-		 else if(isDashing)//dash atarkenki hareket
-		 {
-			 body.velocity = new Vector2(0, 0);
-			 if(dashingDir.x == 0 && dashingDir.y > 0)
+		/*	 if (!isDashing && !onWall() && !isWallJumping)
 			 {
-				 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity*3/4;
+				 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
 			 }
-			 else if(dashingDir.x != 0 && dashingDir.y == 0)
+			 else if(isDashing)//dash atarkenki hareket
 			 {
-				 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 5/4;
+				 body.velocity = new Vector2(0, 0);
+				 if(dashingDir.x == 0 && dashingDir.y > 0)
+				 {
+					 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity*3/4;
+				 }
+				 else if(dashingDir.x != 0 && dashingDir.y == 0)
+				 {
+					 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 5/4;
+				 }
+				 else 
+				 {
+					 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
+				 }    
+
 			 }
-			 else 
+			 else if (isWallJumping)
 			 {
-				 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
-			 }    
+				 new WaitForSeconds(1f);
+				 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
 
-		 }
-		 else if (isWallJumping)
-		 {
-			 new WaitForSeconds(1f);
-			 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
-
-		 }*/
+			 }*/
 
 		if (isGrounded()) //yere düþünce jumpcount sýfýrlama
             {
             airJumpCounter = 1;
             groundJumpCounter = 1;
              print("yerde");
-                   //sonra dön, ilk zýplayýþta jumpcount eksilmiyo. zýplayýnca yerden hemen ayrýlmadýðý için isgrounded jump countu sýfýrlýyo olabilir.
+            //sonra dön, ilk zýplayýþta jumpcount eksilmiyo. zýplayýnca yerden hemen ayrýlmadýðý için isgrounded jump countu sýfýrlýyo olabilir.
 
 			if (canDashCondition)  canDash = true;
            
@@ -184,7 +219,17 @@ public class PlayerMovement : MonoBehaviour
             }
         dashingCooldown += Time.deltaTime;
 
-        if (Input.GetKeyDown(KeyCode.K)) print("K");
+
+		if (onWall() && !isGrounded())
+		{
+			wallJumpExpecter = wallJumpExpecterTime;
+			print("Expect");
+		}
+		wallJumpExpecter -= Time.deltaTime;
+
+		if (!isGrounded()) print("Yerde deðil");
+		if (onWall()) print("Duvarda");
+		if (onWall() && !isGrounded()) print("Yerde deðil duvarda");
 		Jump();
 		Climb();
 		WallJump();
@@ -278,21 +323,23 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallJump()
     {
-        if ((onWall() || isClimbing()) && Input.GetKeyDown(KeyCode.Space))
+        if ((wallJumpExpecter > 0 || isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
         {
             isWallJumping = true;
-            if (isWallJumping) print("iswalljumping:true");
+			wallJumpingCounter = wallJumpingDuration;
+            wallJumpExpecter = 0;
+			if (isWallJumping) print("iswalljumping:true");
             else print("iswalljumpingfalse");
         }
 
         if (isWallJumping) 
         {
-			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 15, wallJumpingPower.y * 5);
-            print("X" + -transform.localScale.x * wallJumpingPower.x * 15 + " Y " + wallJumpingPower.y * 5);
+			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 5, wallJumpingPower.y * 5);
+            print("X" + -transform.localScale.x * wallJumpingPower.x  + " Y " + wallJumpingPower.y );
             print("A");
-            new WaitForSeconds(wallJumpingTime);
-            print("B");
-            isWallJumping=false;
+            wallJumpingCounter -= Time.deltaTime;
+            if(wallJumpingCounter < 0) isWallJumping = false; print("B");
+
 		}
     }
 
