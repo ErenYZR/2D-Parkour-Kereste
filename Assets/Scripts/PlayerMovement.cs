@@ -46,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
     //wall jump
     private bool isWallJumping;
     private float wallJumpingDirection;
-    private float wallJumpingTime = 1f;
+    private float wallJumpingTime = 1.5f;
     private float wallJumpingCounter;
     private float wallJumpingDuration = 0.1f;
     private Vector2 wallJumpingPower = new Vector2(2f, 3f);
@@ -54,8 +54,8 @@ public class PlayerMovement : MonoBehaviour
 	private float wallJumpExpecterTime =0.05f;
 
 	//hanging
-	private float hangingTime = 0.2f;
-    private float hangingTimeCounter;
+	private float jumpingTime = 0.2f;
+    private float jumpingTimeCounter;
 
 	private void Awake()
 	{
@@ -116,12 +116,18 @@ public class PlayerMovement : MonoBehaviour
         if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
+
+            if (!isGrounded())
+            {
+				body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 12, body.velocity.y);
+                print("a");
+			}
         }
         else if (horizontalInput * body.velocity.x < 0 && !isWallJumping)
         {
             body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
             if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
-        }
+		}
         else if (isDashing)//dash atarkenki hareket
         {
             body.velocity = new Vector2(0, 0);
@@ -140,10 +146,10 @@ public class PlayerMovement : MonoBehaviour
         }//dash atarken hareket
 
 
-
+        //duvarda zýplarken yavaþlamasý için
 		if (Mathf.Abs(body.velocity.x) < maxSpeed && isWallJumping && !isDashing && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
 		{
-			body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 12, body.velocity.y);
+			body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 100, body.velocity.y);
 		}
 		else if (horizontalInput * body.velocity.x < 0 && isWallJumping && !isDashing)
 		{
@@ -151,7 +157,13 @@ public class PlayerMovement : MonoBehaviour
 			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 		}
 
-		if (body.velocity.y > 19)
+
+
+        //havada daha yavaþ hareket etme 
+
+
+
+		if (body.velocity.y > 19)// dikey hýz limiti
         {
             body.velocity = new Vector2 (body.velocity.x, body.velocity.y-1);
         }
@@ -160,7 +172,7 @@ public class PlayerMovement : MonoBehaviour
 			body.velocity = new Vector2(body.velocity.x, body.velocity.y + 1);
 		}
 
-		if (body.velocity.x > 17)
+		if (body.velocity.x > 17)//yatay hýz limiti
 		{
 			body.velocity = new Vector2(body.velocity.x - 1, body.velocity.y);
 		}
