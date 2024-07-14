@@ -42,6 +42,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: grid
+  - name: BackGround
+    uniqueID: 608502643
+    locked: 0
+  - name: Grid
     uniqueID: 1945198795
+    locked: 0
+  - name: Player
+    uniqueID: 529811319
     locked: 0
