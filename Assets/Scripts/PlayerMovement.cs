@@ -160,11 +160,11 @@ public class PlayerMovement : MonoBehaviour
 			body.velocity = new Vector2(body.velocity.x, body.velocity.y + 1);
 		}
 
-		if (body.velocity.x > 17)
+		if (body.velocity.x > 14)
 		{
 			body.velocity = new Vector2(body.velocity.x - 1, body.velocity.y);
 		}
-		else if (body.velocity.x < -17)
+		else if (body.velocity.x < -14)
 		{
 			body.velocity = new Vector2(body.velocity.x + 1, body.velocity.y);
 		}
