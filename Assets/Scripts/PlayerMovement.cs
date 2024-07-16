@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Rendering;
 using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerMovement : MonoBehaviour
@@ -18,10 +19,12 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] private BoxCollider2D climb;
     [SerializeField] private float maxSpeed;
+	[SerializeField] private float maxSpeedWallJump;
 	[SerializeField] private float acceleration;
+	[SerializeField] private float accelerationWallJump;
+
 	[SerializeField] private float hýz;
 	[SerializeField] private float dikeyHýz;
-	public float speed;
 	public float jumpPower;
     private float horizontalInput;
     private float verticalInput;
@@ -31,6 +34,12 @@ public class PlayerMovement : MonoBehaviour
     private float timer;
     [SerializeField] float climbSpeed = 3f;
     private bool doubleJump;
+
+    private float coyoteTimeCounter;
+    private float coyoteTime = 0.1f ;
+
+    private float jumpBufferTime = 0.1f;
+    private float jumpBufferCounter;
  
 
     //dash variables
@@ -52,10 +61,13 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 wallJumpingPower = new Vector2(2f, 3f);
     private float wallJumpExpecter;
 	private float wallJumpExpecterTime =0.05f;
+    private float wallJumpingAfterCounter;
 
 	//hanging
 	private float hangingTime = 0.2f;
     private float hangingTimeCounter;
+
+    private float airTime =0.54f;
 
 	private void Awake()
 	{
@@ -76,10 +88,11 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-
+        if (wallJumpingCounter == 0.01f) print("WallJump Bitti");
         if (isClimbing()) print("Týrmanýyor");
         if (onWall()) print("Duvarda");
-        if (isGrounded()) print("Yerde");
+        if (isGrounded()) print("Yerde"); //print(airTime);
+        if (wallJumpingAfterCounter > 0) print("walljumpingaftercounter>0");
 
 
         horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -101,19 +114,19 @@ public class PlayerMovement : MonoBehaviour
             transform.localScale = new Vector3(-1,1,1);
         }
 
+		acceleration = maxSpeed-Mathf.Abs(body.velocity.x);
+        accelerationWallJump = maxSpeedWallJump-Mathf.Abs(body.velocity.x);
+		hýz = body.velocity.x;
+        dikeyHýz = body.velocity.y;
+
 		if (horizontalInput == 0 && !isWallJumping && !isDashing)//elini çekince durmayý saðlýyo
 		{
-			body.velocity = new Vector2(body.velocity.x/100, body.velocity.y);
+			body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);
 			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 		}
 
-		acceleration = maxSpeed-Mathf.Abs(body.velocity.x);
-        hýz = body.velocity.x;
-        dikeyHýz = body.velocity.y;
 
-
-
-        if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
+		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
         }
@@ -141,14 +154,16 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-		if (Mathf.Abs(body.velocity.x) < maxSpeed && isWallJumping && !isDashing && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
+		if (Mathf.Abs(body.velocity.x) < maxSpeedWallJump && wallJumpingAfterCounter > 0 && !isWallJumping && !isDashing && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))//wall jumpingten bir süre sonra da iþe yaramalý
 		{
-			body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 12, body.velocity.y);
+			body.velocity = new Vector2(body.velocity.x + (accelerationWallJump * horizontalInput) / 12, body.velocity.y);
+            //body.velocity = Vector2.zero;
 		}
-		else if (horizontalInput * body.velocity.x < 0 && isWallJumping && !isDashing)
+		else if (horizontalInput * body.velocity.x < 0 && wallJumpingAfterCounter > 0 && !isDashing && !isWallJumping)
 		{
-			body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 4), body.velocity.y);
+			body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 8), body.velocity.y);
 			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+			//body.velocity = Vector2.zero;
 		}
 
 		if (body.velocity.y > 19)
@@ -199,16 +214,20 @@ public class PlayerMovement : MonoBehaviour
 
 			 }*/
 
-		if (isGrounded()) //yere düþünce jumpcount sýfýrlama
+		if (isGrounded()) //yere düþünce jumpcount sýfýrlama ve coyote time
             {
             airJumpCounter = 1;
             groundJumpCounter = 1;
+            coyoteTimeCounter = coyoteTime;
              print("yerde");
-            //sonra dön, ilk zýplayýþta jumpcount eksilmiyo. zýplayýnca yerden hemen ayrýlmadýðý için isgrounded jump countu sýfýrlýyo olabilir.
 
 			if (canDashCondition)  canDash = true;
            
             }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime;
+        }
 
             //dash
             if (Input.GetKeyDown(KeyCode.Mouse1) && canDash && canDashCondition && dashingCooldown >1f)
@@ -225,12 +244,19 @@ public class PlayerMovement : MonoBehaviour
 			wallJumpExpecter = wallJumpExpecterTime;
 			print("Expect");
 		}
-		wallJumpExpecter -= Time.deltaTime;
 
-		if (!isGrounded()) print("Yerde deðil");
-		if (onWall()) print("Duvarda");
-		if (onWall() && !isGrounded()) print("Yerde deðil duvarda");
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            jumpBufferCounter = jumpBufferTime;
+        }
+        else jumpBufferCounter -= Time.deltaTime;
+
+		wallJumpExpecter -= Time.deltaTime;
+        wallJumpingAfterCounter -= Time.deltaTime;
+
+
 		Jump();
+		airTime -= Time.deltaTime;
 		Climb();
 		WallJump();
 	}
@@ -254,18 +280,25 @@ public class PlayerMovement : MonoBehaviour
 
     private void Jump()
     {
-		if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && isGrounded() && groundJumpCounter > 0 && !isWallJumping)
+
+		if (jumpBufferCounter > 0 && !isClimbing() && coyoteTimeCounter > 0 && groundJumpCounter > 0 && !isWallJumping)
         {
+            airTime = 0.54f;
+            jumpBufferCounter = 0;
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
             groundJumpCounter--;
-
 		}
 
-		if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && !isGrounded() && airJumpCounter > 0 && !isWallJumping)
+		if (Input.GetKeyUp(KeyCode.Space) && airTime > 0)//yerde zýpladýysa havada zýplamadýysa ve yukarý doðru gidiyorsa elini spaceden çekince hýzý yarýya düþecek
+		{
+			body.velocity = new Vector2(body.velocity.x, body.velocity.y / 2);
+		}
+
+		/*if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && coyoteTimeCounter <=0 && !isGrounded() && airJumpCounter > 0 && !isWallJumping)
         {
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
             airJumpCounter--;
-		}
+		}*/
 	}
 
     private void Dash()
@@ -335,10 +368,9 @@ public class PlayerMovement : MonoBehaviour
         if (isWallJumping) 
         {
 			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 5, wallJumpingPower.y * 5);
-            print("X" + -transform.localScale.x * wallJumpingPower.x  + " Y " + wallJumpingPower.y );
-            print("A");
             wallJumpingCounter -= Time.deltaTime;
-            if(wallJumpingCounter < 0) isWallJumping = false; print("B");
+            wallJumpingAfterCounter = 5f;
+            if(wallJumpingCounter < 0) isWallJumping = false;
 
 		}
     }
