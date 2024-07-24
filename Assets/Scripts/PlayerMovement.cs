@@ -121,7 +121,7 @@ public class PlayerMovement : MonoBehaviour
 
 		if (horizontalInput == 0 && !isWallJumping && !isDashing)//elini çekince durmayý saðlýyo
 		{
-			body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);
+			body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir.
 			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 		}
 
