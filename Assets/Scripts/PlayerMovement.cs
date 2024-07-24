@@ -107,7 +107,7 @@ public class PlayerMovement : MonoBehaviour
 		anim.SetBool("grounded", isGrounded());
 		anim.SetBool("jump", !isGrounded() && !isClimbing());
 		anim.SetBool("dash", whileDashing());
-        anim.SetBool("climb", isClimbing() && verticalInput != 0);
+        anim.SetBool("climb", isClimbing() && verticalInput != 0 && !dead);
         anim.SetBool("hang", isClimbing() && verticalInput == 0 && !dead);
         anim.SetBool("dead", dead);
 
@@ -232,8 +232,13 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter -= Time.deltaTime;
         }
 
+        if (onWall())
+        {
+            bouncing = false ;
+        }
+
             //dash
-            if (Input.GetKeyDown(KeyCode.Mouse1) && canDash && canDashCondition && dashingCooldown >1f)
+            if (Input.GetKeyDown(KeyCode.Mouse1) && canDash && canDashCondition && dashingCooldown >0.5f)
             {
                 Dash();
  
