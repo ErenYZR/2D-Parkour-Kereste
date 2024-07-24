@@ -9,6 +9,9 @@ using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerMovement : MonoBehaviour
 {
+	public bool bouncing;
+	[SerializeField] JumpPad bounce;
+
     public LayerMask groundLayer;
 	public LayerMask wallLayer;
 
@@ -61,13 +64,15 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 wallJumpingPower = new Vector2(2f, 3f);
     private float wallJumpExpecter;
 	private float wallJumpExpecterTime =0.05f;
-    private float wallJumpingAfterCounter;
+    private bool afterWallJumping;
 
 	//hanging
 	private float hangingTime = 0.2f;
     private float hangingTimeCounter;
 
     private float airTime =0.54f;
+
+    public bool dead;
 
 	private void Awake()
 	{
@@ -92,17 +97,20 @@ public class PlayerMovement : MonoBehaviour
         if (isClimbing()) print("Týrmanýyor");
         if (onWall()) print("Duvarda");
         if (isGrounded()) print("Yerde"); //print(airTime);
-        if (wallJumpingAfterCounter > 0) print("walljumpingaftercounter>0");
 
-
+        
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
-		//animatör parametrelerini ayarlama kýsmý
-		anim.SetBool("run", horizontalInput != 0 && isGrounded());
+        //animatör parametrelerini ayarlama kýsmý
+        anim.SetBool("run", horizontalInput != 0 && isGrounded());
 		anim.SetBool("grounded", isGrounded());
-		anim.SetBool("jump", !isGrounded());
+		anim.SetBool("jump", !isGrounded() && !isClimbing());
 		anim.SetBool("dash", whileDashing());
+        anim.SetBool("climb", isClimbing() && verticalInput != 0);
+        anim.SetBool("hang", isClimbing() && verticalInput == 0 && !dead);
+        anim.SetBool("dead", dead);
+
 
 		//Oyuncunun saða sola dönme animasyonu
 		if (horizontalInput > 0.01f)
@@ -119,18 +127,18 @@ public class PlayerMovement : MonoBehaviour
 		hýz = body.velocity.x;
         dikeyHýz = body.velocity.y;
 
-		if (horizontalInput == 0 && !isWallJumping && !isDashing)//elini çekince durmayý saðlýyo
+		if (horizontalInput == 0 && !isWallJumping && !isDashing && !bouncing)//elini çekince durmayý saðlýyorrrrr
 		{
 			body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir.
 			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 		}
 
 
-		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))
+		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing)
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
         }
-        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping)
+        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing)
         {
             body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
             if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
@@ -150,23 +158,17 @@ public class PlayerMovement : MonoBehaviour
             {
                 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
             }
-        }//dash atarken hareket
-
-
-
-		if (Mathf.Abs(body.velocity.x) < maxSpeedWallJump && wallJumpingAfterCounter > 0 && !isWallJumping && !isDashing && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))//wall jumpingten bir süre sonra da iþe yaramalý
-		{
-			body.velocity = new Vector2(body.velocity.x + (accelerationWallJump * horizontalInput) / 12, body.velocity.y);
-            //body.velocity = Vector2.zero;
-		}
-		else if (horizontalInput * body.velocity.x < 0 && wallJumpingAfterCounter > 0 && !isDashing && !isWallJumping)
-		{
-			body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 8), body.velocity.y);
-			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
-			//body.velocity = Vector2.zero;
+        }
+        else if (bouncing)//jump pad hareketi
+        {
+			body.velocity = new Vector2(body.velocity.x + horizontalInput / 4, body.velocity.y);
 		}
 
-		if (body.velocity.y > 19)
+
+
+		
+
+		if (body.velocity.y > 19)//hýz limiti
         {
             body.velocity = new Vector2 (body.velocity.x, body.velocity.y-1);
         }
@@ -219,6 +221,7 @@ public class PlayerMovement : MonoBehaviour
             airJumpCounter = 1;
             groundJumpCounter = 1;
             coyoteTimeCounter = coyoteTime;
+            bouncing = false;
              print("yerde");
 
 			if (canDashCondition)  canDash = true;
@@ -252,7 +255,7 @@ public class PlayerMovement : MonoBehaviour
         else jumpBufferCounter -= Time.deltaTime;
 
 		wallJumpExpecter -= Time.deltaTime;
-        wallJumpingAfterCounter -= Time.deltaTime;
+
 
 
 		Jump();
@@ -369,11 +372,32 @@ public class PlayerMovement : MonoBehaviour
         {
 			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 5, wallJumpingPower.y * 5);
             wallJumpingCounter -= Time.deltaTime;
-            wallJumpingAfterCounter = 5f;
             if(wallJumpingCounter < 0) isWallJumping = false;
 
 		}
     }
+
+
+
+    IEnumerator WallJumpWaiter()
+    {
+        afterWallJumping = true;
+        yield return new WaitForSecondsRealtime(2);
+        afterWallJumping = false;
+    }
+    IEnumerator afterWallJump()
+    {
+		if (Mathf.Abs(body.velocity.x) < maxSpeedWallJump && !isWallJumping && !isDashing && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))//wall jumpingten bir süre sonra da iþe yaramalý
+		{
+			body.velocity = new Vector2(body.velocity.x + (accelerationWallJump * horizontalInput) / 12, body.velocity.y);
+		}
+		else if (horizontalInput * body.velocity.x < 0 && !isDashing && !isWallJumping)
+		{
+			body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 8), body.velocity.y);
+			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+		}
+        yield return new WaitForSecondsRealtime(2);
+	}
 
 
     //duvara týrmanma
