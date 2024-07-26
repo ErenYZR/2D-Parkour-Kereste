@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -127,18 +128,18 @@ public class PlayerMovement : MonoBehaviour
 		hýz = body.velocity.x;
         dikeyHýz = body.velocity.y;
 
-		if (horizontalInput == 0 && !isWallJumping && !isDashing && !bouncing)//elini çekince durmayý saðlýyorrrrr
+		if (horizontalInput == 0 && !isWallJumping && !isDashing)//elini çekince durmayý saðlýyorrrrr
 		{
 			body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir.
 			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 		}
 
 
-		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing)
+		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing && !isClimbing())
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
         }
-        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing)
+        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing && !isClimbing())
         {
             body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
             if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
@@ -159,9 +160,22 @@ public class PlayerMovement : MonoBehaviour
                 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
             }
         }
-        else if (bouncing  || isWallJumping)//jump pad hareketi
+        else if (bouncing && Mathf.Abs(body.velocity.x) < maxSpeed* 7/8 && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !isWallJumping && !isClimbing())//jump pad hareketi
         {
-			body.velocity = new Vector2(body.velocity.x + horizontalInput / 4, body.velocity.y);
+            if (MathF.Abs(body.velocity.x) < 10)
+            {
+				body.velocity = new Vector2(body.velocity.x + horizontalInput / 4, body.velocity.y);
+			}
+		}
+        else if (bouncing && horizontalInput * body.velocity.x < 0 && !isWallJumping && !isClimbing())
+        {
+			body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
+			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+		}
+        else if (isClimbing())
+        {
+			body.velocity = new Vector2(0, climbSpeed * verticalInput);
+            print("Að");
 		}
 
 
@@ -347,12 +361,14 @@ public class PlayerMovement : MonoBehaviour
 
         if (isClimbing() && !isWallJumping)
         {
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
+            if (Input.GetKey(KeyCode.Mouse0)) //  if (Input.GetKeyDown(KeyCode.Mouse0))
+			{
 				body.velocity = new Vector2(0, 0);
 				body.gravityScale = 0;
+				body.velocity = new Vector2(0, climbSpeed * verticalInput);//body.velocity = new Vector2(body.velocity.x, climbSpeed * verticalInput);
+				print("Sýfýrlamak");
 			}
-			body.velocity = new Vector2(body.velocity.x, climbSpeed * verticalInput);
+
 		}
         else if (!isClimbing())
         {
