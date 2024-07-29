@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Respawn : MonoBehaviour
@@ -18,6 +19,13 @@ public class Respawn : MonoBehaviour
 	{
 		checkpointPos = transform.position;
 	}
+	private void Update()
+	{
+		if(playerMovement.stuck == true)
+		{
+			Die();
+		}
+	}
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
@@ -26,6 +34,7 @@ public class Respawn : MonoBehaviour
 			Die();
 		}
 	}
+
 
 	public void UpdateCheckpoint(Vector2 pos)
 	{
@@ -48,6 +57,7 @@ IEnumerator respawn(float duration)
 		//transform.localScale = Vector3.one;
 		body.simulated = true;
 		playerMovement.dead = false;
+		playerMovement.stuck = false;
 	}
 
 

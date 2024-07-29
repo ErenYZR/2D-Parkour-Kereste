@@ -12,6 +12,8 @@ public class PlayerMovement : MonoBehaviour
 {
 	public bool bouncing;
 	[SerializeField] JumpPad bounce;
+    [SerializeField] JumpPad active;
+    [SerializeField] JumpPad direction;
 
     public LayerMask groundLayer;
 	public LayerMask wallLayer;
@@ -74,12 +76,14 @@ public class PlayerMovement : MonoBehaviour
     private float airTime =0.54f;
     //death
     public bool dead;
+    public bool stuck;
 
     //platform
     public bool isOnPlatform;
     public Rigidbody2D platformRb;
 
 	public CoinManager coinManager;
+
 
 	private void Awake()
 	{
@@ -140,7 +144,7 @@ public class PlayerMovement : MonoBehaviour
 		{
             if (!isOnPlatform)
             {
-				body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir.
+				body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir. /100dü
 				if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 			}
             else if (isOnPlatform)
@@ -186,6 +190,11 @@ public class PlayerMovement : MonoBehaviour
 		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
 		{
 				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 2), body.velocity.y);
+
+            if(body.velocity.y ==0)
+            {
+				//body.velocity = new Vector2(body.velocity.x / 100*85, body.velocity.y);
+			}
 		}
 		/* else if (bouncing && horizontalInput * body.velocity.x < 0 && !isWallJumping && !isClimbing() && !isOnPlatform)
 		 {
@@ -574,5 +583,13 @@ public class PlayerMovement : MonoBehaviour
 			coinManager.coinCount++;
 
 		}
+	}
+
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+        if (collision.gameObject.CompareTag("Stuck"))
+        {
+            stuck = true;
+        }
 	}
 }

@@ -13,7 +13,7 @@ public class JumpPad : MonoBehaviour
 	[SerializeField] GameObject player;
 	[SerializeField] Rigidbody2D body;
 	private Animator anim;
-	private bool active;
+	public bool active;
 
 
 	private void Awake()
@@ -75,8 +75,8 @@ public class JumpPad : MonoBehaviour
 		active = true;
 		yield return new WaitForSecondsRealtime(1f);
 		active = false;
-		//yield return new WaitForSeconds(1f);
-	//	playerMovement.bouncing = false;
+		yield return new WaitForSeconds(1f);
+		playerMovement.bouncing = false;
 
 
 	}
