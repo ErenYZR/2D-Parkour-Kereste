@@ -180,7 +180,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (MathF.Abs(body.velocity.x) < 6)
             {
-				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 2), body.velocity.y);
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 3), body.velocity.y);
 			}
 		}
 		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
