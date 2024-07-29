@@ -71,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
     private float hangingTimeCounter;
 
     private float airTime =0.54f;
-    //death
+
     public bool dead;
 
 	private void Awake()
@@ -159,7 +159,7 @@ public class PlayerMovement : MonoBehaviour
                 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
             }
         }
-        else if (bouncing  || isWallJumping)//jump pad hareketi
+        else if (bouncing)//jump pad hareketi
         {
 			body.velocity = new Vector2(body.velocity.x + horizontalInput / 4, body.velocity.y);
 		}
