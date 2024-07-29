@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -74,6 +75,12 @@ public class PlayerMovement : MonoBehaviour
 
     public bool dead;
 
+    //platform
+    public bool isOnPlatform;
+    public Rigidbody2D platformRb;
+
+	public CoinManager coinManager;
+
 	private void Awake()
 	{
         //Rigidbody ve animatör için referans alýyoruz.
@@ -93,6 +100,8 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        if (bouncing) print("Bouncing");
+        if (isOnPlatform) print("Platform");
         if (wallJumpingCounter == 0.01f) print("WallJump Bitti");
         if (isClimbing()) print("Týrmanýyor");
         if (onWall()) print("Duvarda");
@@ -106,7 +115,7 @@ public class PlayerMovement : MonoBehaviour
         anim.SetBool("run", horizontalInput != 0 && isGrounded());
 		anim.SetBool("grounded", isGrounded());
 		anim.SetBool("jump", !isGrounded() && !isClimbing());
-		anim.SetBool("dash", whileDashing());
+		anim.SetBool("dash", whileDashing() && !dead);
         anim.SetBool("climb", isClimbing() && verticalInput != 0 && !dead);
         anim.SetBool("hang", isClimbing() && verticalInput == 0 && !dead);
         anim.SetBool("dead", dead);
@@ -126,24 +135,32 @@ public class PlayerMovement : MonoBehaviour
         accelerationWallJump = maxSpeedWallJump-Mathf.Abs(body.velocity.x);
 		hýz = body.velocity.x;
         dikeyHýz = body.velocity.y;
-
-		if (horizontalInput == 0 && !isWallJumping && !isDashing && !bouncing)//elini çekince durmayý saðlýyorrrrr
+        
+		if (horizontalInput == 0 && !isWallJumping && !isDashing && !bouncing && !isClimbing())//elini çekince durmayý saðlýyorrrrr
 		{
-			body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir.
-			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+            if (!isOnPlatform)
+            {
+				body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir.
+				if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+			}
+            else if (isOnPlatform)
+            {
+                body.velocity = new Vector2(platformRb.velocity.x, body.velocity.y);
+            }
+
 		}
 
 
-		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing)
+		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing && !isClimbing() && !isOnPlatform)
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
         }
-        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing)
+        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing && !isClimbing() && !isOnPlatform)
         {
             body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
             if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
         }
-        else if (isDashing)//dash atarkenki hareket
+        else if (isDashing && !bouncing)//dash atarkenki hareket
         {
             body.velocity = new Vector2(0, 0);
             if (dashingDir.x == 0 && dashingDir.y > 0)
@@ -159,10 +176,33 @@ public class PlayerMovement : MonoBehaviour
                 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
             }
         }
+<<<<<<< HEAD
         else if (bouncing)//jump pad hareketi
+=======
+        else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0)//jump pad hareketi
+>>>>>>> 74b381ec835102a9c10714a4f9ebd5770d8d3ee1
         {
-			body.velocity = new Vector2(body.velocity.x + horizontalInput / 4, body.velocity.y);
+            if (MathF.Abs(body.velocity.x) < 6)
+            {
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 2), body.velocity.y);
+			}
 		}
+		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
+		{
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 2), body.velocity.y);
+		}
+		/* else if (bouncing && horizontalInput * body.velocity.x < 0 && !isWallJumping && !isClimbing() && !isOnPlatform)
+		 {
+			 //body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
+			 //if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+		 }*/
+		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing())
+		{
+            body.velocity = new Vector2((horizontalInput * 10) + platformRb.velocity.x,body.velocity.y);
+        }
+
+
+
 
 
 
@@ -294,6 +334,7 @@ public class PlayerMovement : MonoBehaviour
             airTime = 0.54f;
             jumpBufferCounter = 0;
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
+            bouncing = false;
             groundJumpCounter--;
 		}
 
@@ -311,6 +352,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Dash()
     {   
+        bouncing = false ;
             dashingCooldown = 0;
             isDashing = true;
             canDash = false;
@@ -347,12 +389,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (isClimbing() && !isWallJumping)
         {
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
+            if (Input.GetKey(KeyCode.Mouse0)) //  if (Input.GetKeyDown(KeyCode.Mouse0))
+			{
+                bouncing = false ;
 				body.velocity = new Vector2(0, 0);
 				body.gravityScale = 0;
+
+                if (!isOnPlatform) body.velocity = new Vector2(0, climbSpeed * verticalInput);//body.velocity = new Vector2(body.velocity.x, climbSpeed * verticalInput);
+                else if(isOnPlatform) body.velocity = new Vector2(platformRb.velocity.x, climbSpeed * verticalInput);
 			}
-			body.velocity = new Vector2(body.velocity.x, climbSpeed * verticalInput);
+
 		}
         else if (!isClimbing())
         {
@@ -366,6 +412,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if ((wallJumpExpecter > 0 || isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
         {
+            bouncing = false;
             isWallJumping = true;
 			wallJumpingCounter = wallJumpingDuration;
             wallJumpExpecter = 0;
@@ -523,4 +570,13 @@ public class PlayerMovement : MonoBehaviour
         return (Input.GetKey(KeyCode.Mouse0) && onWall() && !isWallJumping);
     }
 
+	private void OnTriggerEnter2D(Collider2D collision)
+	{
+		if (collision.gameObject.CompareTag("Coin"))
+		{
+            Destroy(collision.gameObject);
+			coinManager.coinCount++;
+
+		}
+	}
 }
