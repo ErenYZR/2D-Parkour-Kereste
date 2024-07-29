@@ -35,5 +35,7 @@ public class BreakablePlatform : MonoBehaviour
 
 		yield return new WaitForSeconds(delay);
 		transform.localScale = Vector3.zero;
+		yield return new WaitForSeconds(3);
+		transform.localScale = Vector3.one;
 	}
 }
