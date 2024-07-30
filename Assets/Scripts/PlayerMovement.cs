@@ -348,11 +348,11 @@ public class PlayerMovement : MonoBehaviour
 			body.velocity = new Vector2(body.velocity.x, body.velocity.y / 2);
 		}
 
-		/*if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && coyoteTimeCounter <=0 && !isGrounded() && airJumpCounter > 0 && !isWallJumping)
+		if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && coyoteTimeCounter <=0 && !isGrounded() && airJumpCounter > 0 && !isWallJumping)
         {
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
             airJumpCounter--;
-		}*/
+		}
 	}
 
     private void Dash()
