@@ -7,11 +7,14 @@ public class BreakablePlatform : MonoBehaviour
 	[SerializeField] private float delay;
 	PlayerMovement playerMovement;
 	[SerializeField] GameObject player;
+	private bool breaking;
+	private Animator anim;
 
 
 	private void Awake()
 	{
 		playerMovement = player.GetComponent<PlayerMovement>();
+		anim = GetComponent<Animator>();
 	}
 
 	private void Update()
@@ -20,6 +23,8 @@ public class BreakablePlatform : MonoBehaviour
 		{
 			transform.localScale = Vector3.one;
 		}
+
+		anim.SetBool("breaking", breaking);
 	}
 
 	private void OnCollisionEnter2D(Collision2D collision)
@@ -32,9 +37,10 @@ public class BreakablePlatform : MonoBehaviour
 
 	private IEnumerator Breaking()
 	{
-
+		breaking = true;
 		yield return new WaitForSeconds(delay);
 		transform.localScale = Vector3.zero;
+		breaking = false;
 		yield return new WaitForSeconds(3);
 		transform.localScale = Vector3.one;
 	}

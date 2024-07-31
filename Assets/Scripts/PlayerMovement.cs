@@ -401,7 +401,7 @@ public class PlayerMovement : MonoBehaviour
 				body.gravityScale = 0;
 
                 if (!isOnPlatform) body.velocity = new Vector2(0, climbSpeed * verticalInput);//body.velocity = new Vector2(body.velocity.x, climbSpeed * verticalInput);
-                else if(isOnPlatform) body.velocity = new Vector2(platformRb.velocity.x, climbSpeed * verticalInput);
+                else if(isOnPlatform) body.velocity = new Vector2(platformRb.velocity.x, platformRb.velocity.y+climbSpeed * verticalInput);
 			}
 
 		}
@@ -427,7 +427,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isWallJumping) 
         {
-			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 5, wallJumpingPower.y * 5);
+			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 7, wallJumpingPower.y * 3.5f);
             wallJumpingCounter -= Time.deltaTime;
             if(wallJumpingCounter < 0) isWallJumping = false;
 
