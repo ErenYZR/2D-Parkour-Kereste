@@ -63,3 +63,12 @@ TagManager:
   - name: Portal
     uniqueID: 1572008379
     locked: 0
+  - name: Jumpad
+    uniqueID: 3798839345
+    locked: 0
+  - name: Wall
+    uniqueID: 2782154563
+    locked: 0
+  - name: Spike
+    uniqueID: 2691137309
+    locked: 0
