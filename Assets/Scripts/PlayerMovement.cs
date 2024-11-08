@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;
 	public LayerMask wallLayer;
 
-	private Rigidbody2D body;
+	public Rigidbody2D body;
 	private Animator anim;
 	private BoxCollider2D boxCollider;
 	private TrailRenderer trailRenderer;
@@ -415,7 +415,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void WallJump()
     {
-        if ((wallJumpExpecter > 0 || isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
+        if ((/*wallJumpExpecter > 0 ||*/ isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
         {
             bouncing = false;
             isWallJumping = true;
