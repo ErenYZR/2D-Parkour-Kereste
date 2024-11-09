@@ -14,6 +14,8 @@ public class PlayerMovement : MonoBehaviour
 	[SerializeField] JumpPad bounce;
     [SerializeField] JumpPad active;
     [SerializeField] JumpPad direction;
+    public JumpPad jumpPad;
+    public bool isGroundedControl;
 
     public LayerMask groundLayer;
 	public LayerMask wallLayer;
@@ -92,6 +94,7 @@ public class PlayerMovement : MonoBehaviour
         anim = GetComponent<Animator>();
         boxCollider = GetComponent<BoxCollider2D>();
         trailRenderer = GetComponent<TrailRenderer>();
+        //jumpPad = GetComponent<JumpPad>();
 	}
 
 	// Start is called before the first frame update
@@ -232,6 +235,9 @@ public class PlayerMovement : MonoBehaviour
 		}
 
 
+        if (isGroundedControl) print("Is grounded control true");
+        else print("Is grounded control false");
+
 		//dash atmazkenki hareket
 		/*	 if (!isDashing && !onWall() && !isWallJumping)
 			 {
@@ -262,16 +268,14 @@ public class PlayerMovement : MonoBehaviour
 			 }*/
 
 		if (isGrounded()) //yere düþünce jumpcount sýfýrlama ve coyote time
-            {
+            { 
             airJumpCounter = 1;
             groundJumpCounter = 1;
             coyoteTimeCounter = coyoteTime;
-            bouncing = false;
-             print("yerde");
-
-			if (canDashCondition)  canDash = true;
-           
-            }
+            print("yerde");
+			if (isGroundedControl) bouncing = false;
+			if (canDashCondition) canDash = true;
+		}
         else
         {
             coyoteTimeCounter -= Time.deltaTime;

@@ -52,8 +52,8 @@ public class Portal : MonoBehaviour
 			//playerMovement.body.velocity = playerSpeed * lookingDir.normalized;
 			print(lookingDir.normalized.x + "  " + lookingDir.normalized.y);
 
-			playerMovement.body.velocity = Vector2.zero;
-			collision.gameObject.GetComponent<Rigidbody2D>().AddForce(lookingDir * playerSpeed, ForceMode2D.Impulse);
+			//playerMovement.body.velocity = Vector2.zero;
+			collision.gameObject.GetComponent<Rigidbody2D>().AddForce(lookingDir.normalized * playerSpeed, ForceMode2D.Impulse);
 		}
 
 	}

@@ -46,7 +46,6 @@ public class JumpPad : MonoBehaviour
 	{
 		if (collision.gameObject.CompareTag("Player"))
 		{
-			StartCoroutine(nameof(Bounce));
 
 			switch (direction)
 			{
@@ -62,21 +61,30 @@ public class JumpPad : MonoBehaviour
 
 				case 3:
 					body.velocity = Vector2.zero;
+					StartCoroutine(nameof(Bounce));
 					//body.velocity = Vector2.right* 20;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
 					break;
 
 				case 4:
+					StartCoroutine(nameof(Bounce));
 					//body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.left * bounce, ForceMode2D.Impulse);
 					break;
 				case 5://sað üst
+					StartCoroutine(nameof(Bounce));
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,1) * bounce, ForceMode2D.Impulse);
 					break;
 				case 6:
+					StartCoroutine(nameof(Bounce));
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(-1, 1) * bounce, ForceMode2D.Impulse);
+					break;
+				case 7:
+					StartCoroutine(nameof(Bounce));
+					body.velocity = Vector2.zero;
+					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1, 0.3f) * bounce, ForceMode2D.Impulse);
 					break;
 			}
 								
@@ -84,9 +92,12 @@ public class JumpPad : MonoBehaviour
 	}
 	IEnumerator Bounce()
 	{
+		playerMovement.isGroundedControl = false;
 		playerMovement.bouncing = true;
 		active = true;
-		yield return new WaitForSecondsRealtime(1f);
+		yield return new WaitForSecondsRealtime(0.1f);
+		playerMovement.isGroundedControl = true;
+		yield return new WaitForSecondsRealtime(0.9f);
 		active = false;
 		yield return new WaitForSeconds(1f);
 		playerMovement.bouncing = false;
