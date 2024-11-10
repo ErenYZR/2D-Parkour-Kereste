@@ -27,13 +27,19 @@ public class JumpPad : MonoBehaviour
 	[SerializeField] Rigidbody2D body;
 	private Animator anim;
 	public bool active;
+	IEnumerator bounceCoroutine;
 
 
 	private void Awake()
-	{
+	{		 
 		playerMovement = player.GetComponent<PlayerMovement>();
 		body = player.GetComponent<Rigidbody2D>();
 		anim = GetComponent<Animator>();
+	}
+
+	private void Start()
+	{
+		bounceCoroutine = Bounce();
 	}
 
 	private void Update()
@@ -46,7 +52,8 @@ public class JumpPad : MonoBehaviour
 	{
 		if (collision.gameObject.CompareTag("Player"))
 		{
-
+			if (bounceCoroutine != null) StopCoroutine(bounceCoroutine);
+			bounceCoroutine = Bounce();
 			switch (direction)
 			{
 				case 1:
@@ -61,28 +68,26 @@ public class JumpPad : MonoBehaviour
 
 				case 3:
 					body.velocity = Vector2.zero;
-					StartCoroutine(nameof(Bounce));
-					//body.velocity = Vector2.right* 20;
+					StartCoroutine(bounceCoroutine);
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
 					break;
 
 				case 4:
-					StartCoroutine(nameof(Bounce));
-					//body.velocity = Vector2.zero;
+					StartCoroutine(bounceCoroutine);
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.left * bounce, ForceMode2D.Impulse);
 					break;
 				case 5://sað üst
-					StartCoroutine(nameof(Bounce));
+					StartCoroutine(bounceCoroutine);
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,1) * bounce, ForceMode2D.Impulse);
 					break;
 				case 6:
-					StartCoroutine(nameof(Bounce));
+					StartCoroutine(bounceCoroutine);
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(-1, 1) * bounce, ForceMode2D.Impulse);
 					break;
 				case 7:
-					StartCoroutine(nameof(Bounce));
+					StartCoroutine(bounceCoroutine);
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1, 0.3f) * bounce, ForceMode2D.Impulse);
 					break;
@@ -92,6 +97,7 @@ public class JumpPad : MonoBehaviour
 	}
 	IEnumerator Bounce()
 	{
+		print("Coroutine started" + gameObject.name);
 		playerMovement.isGroundedControl = false;
 		playerMovement.bouncing = true;
 		active = true;
@@ -101,8 +107,6 @@ public class JumpPad : MonoBehaviour
 		active = false;
 		yield return new WaitForSeconds(1f);
 		playerMovement.bouncing = false;
-
-
 	}
 
 }
