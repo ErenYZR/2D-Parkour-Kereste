@@ -23,6 +23,7 @@ public class MovingPlatform : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
     {
+		transform.position = PosA.position;
         targetPos = PosB.position;
 		DirectionCalculate();
     }

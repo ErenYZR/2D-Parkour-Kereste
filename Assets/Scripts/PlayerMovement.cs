@@ -102,6 +102,7 @@ public class PlayerMovement : MonoBehaviour
     {
 		body.gravityScale = 5;
         canDashCondition = true;
+        bouncing = false;
 	}
 
     // Update is called once per frame
@@ -430,9 +431,10 @@ public class PlayerMovement : MonoBehaviour
         }
 
         if (isWallJumping) 
-        {
+        {			
 			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 7, wallJumpingPower.y * 3.5f);
-            wallJumpingCounter -= Time.deltaTime;
+			//transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
+			wallJumpingCounter -= Time.deltaTime;
             if(wallJumpingCounter < 0) isWallJumping = false;
 
 		}
