@@ -70,6 +70,7 @@ public class PlayerMovement : MonoBehaviour
     private float wallJumpExpecter;
 	private float wallJumpExpecterTime =0.05f;
     private bool afterWallJumping;
+	IEnumerator wallJumpBounceCoroutine;
 
 	//hanging
 	private float hangingTime = 0.2f;
@@ -103,6 +104,7 @@ public class PlayerMovement : MonoBehaviour
 		body.gravityScale = 5;
         canDashCondition = true;
         bouncing = false;
+        wallJumpBounceCoroutine = WallJumpBounce();
 	}
 
     // Update is called once per frame
@@ -284,8 +286,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (onWall())
         {
-            bouncing = false ;
-        }
+			if (isGroundedControl) bouncing = false;
+		}
 
             //dash
             if (Input.GetKeyDown(KeyCode.Mouse1) && canDash && canDashCondition && dashingCooldown >0.5f)
@@ -344,8 +346,8 @@ public class PlayerMovement : MonoBehaviour
             airTime = 0.54f;
             jumpBufferCounter = 0;
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
-            bouncing = false;
-            groundJumpCounter--;
+			if (isGroundedControl) bouncing = false;
+			groundJumpCounter--;
 		}
 
 		if (Input.GetKeyUp(KeyCode.Space) && airTime > 0)//yerde zýpladýysa havada zýplamadýysa ve yukarý doðru gidiyorsa elini spaceden çekince hýzý yarýya düþecek
@@ -362,7 +364,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Dash()
     {   
-        bouncing = false ;
+            bouncing = false ;
             dashingCooldown = 0;
             isDashing = true;
             canDash = false;
@@ -397,11 +399,11 @@ public class PlayerMovement : MonoBehaviour
     private void Climb()
     {
 
-        if (isClimbing() && !isWallJumping)
+        if (isClimbing() && !bouncing)
         {
             if (Input.GetKey(KeyCode.Mouse0)) //  if (Input.GetKeyDown(KeyCode.Mouse0))
 			{
-                bouncing = false ;
+				if (isGroundedControl) bouncing = false;
 				body.velocity = new Vector2(0, 0);
 				body.gravityScale = 0;
 
@@ -422,27 +424,45 @@ public class PlayerMovement : MonoBehaviour
     {
         if ((/*wallJumpExpecter > 0 ||*/ isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
         {
-            bouncing = false;
-            isWallJumping = true;
-			wallJumpingCounter = wallJumpingDuration;
-            wallJumpExpecter = 0;
-			if (isWallJumping) print("iswalljumping:true");
-            else print("iswalljumpingfalse");
+			//bouncing = false;
+			//isWallJumping = true;
+			StopCoroutine(WallJumpBounce());
+			wallJumpBounceCoroutine = WallJumpBounce();
+			StartCoroutine(wallJumpBounceCoroutine);
+			//wallJumpingCounter = wallJumpingDuration;
+            //wallJumpExpecter = 0;
+			if (bouncing) print("iswalljumping:true");
+            else print("iswalljumping:false");
         }
 
-        if (isWallJumping) 
-        {			
-			body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 7, wallJumpingPower.y * 3.5f);
+       /* if (isWallJumping) 
+        {
+			body.AddForce(new Vector2(-5, 3f), ForceMode2D.Impulse);
+			//body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 7, wallJumpingPower.y * 3.5f);
+			bouncing = true;
+            if(!bouncing) isWallJumping=false;
 			//transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
-			wallJumpingCounter -= Time.deltaTime;
-            if(wallJumpingCounter < 0) isWallJumping = false;
+			//wallJumpingCounter -= Time.deltaTime;
+            //if(wallJumpingCounter < 0) isWallJumping = false;
 
-		}
+		}*/
     }
 
 
+	IEnumerator WallJumpBounce()
+	{
+		bouncing = true;
+		body.AddForce(new Vector2(-20 * transform.localScale.x, 15f), ForceMode2D.Impulse);
+		print("Walljumpbounce coroutine started");
+		isGroundedControl = false;		
+		yield return new WaitForSecondsRealtime(0.2f);
+		isGroundedControl = true;
+		yield return new WaitForSeconds(1.9f);
+       // bouncing = false;
+	}
 
-    IEnumerator WallJumpWaiter()
+
+	IEnumerator WallJumpWaiter()
     {
         afterWallJumping = true;
         yield return new WaitForSecondsRealtime(2);
@@ -562,14 +582,6 @@ public class PlayerMovement : MonoBehaviour
        // Gizmos.DrawCube(boxCollider.bounds.center, boxCollider.bounds.size * 0.5f);  //zemin kontrol
 	   //Gizmos.DrawCube(boxCollider.bounds.center + new Vector3.down*0.5f, boxCollider.bounds.size * 0.5f);
 	}
-
-
-	//saldýrý
-	public bool canAttack()
-    {
-
-        return horizontalInput == 0 && isGrounded() && !onWall();
-    }
 
     public bool whileDashing()
     {
