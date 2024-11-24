@@ -69,8 +69,10 @@ public class JumpPad : MonoBehaviour
 				case 3:
 					body.velocity = Vector2.zero;
 					StartCoroutine(bounceCoroutine);
-					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
-					break;
+					//collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
+					collision.gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(1, 0) * bounce;
+
+                    break;
 
 				case 4:
 					StartCoroutine(bounceCoroutine);
