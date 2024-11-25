@@ -51,17 +51,19 @@ public class PlayerMovement : MonoBehaviour
  
 
     //dash variables
-    [SerializeField] private float dashingVelocity;
-    [SerializeField] private float dashingTime;
+    //[SerializeField] private float dashingVelocity;
+    //[SerializeField] private float dashingTime;
     private float dashingCooldown;
-    private Vector2 dashingDir;
-    private bool isDashing;
-    private bool canDash = true;
+	//private Vector2 dashingDir;
+	private Vector2 dashDirection;
+	private bool isDashing = false;
     private bool canDashCondition;
+	[SerializeField] private float dashDistance = 5f;
+	[SerializeField] private float dashDuration = 0.2f;
 
 
-    //wall jump
-    private bool isWallJumping;
+	//wall jump
+	private bool isWallJumping;
     private float wallJumpingDirection;
     private float wallJumpingTime = 1f;
     private float wallJumpingCounter;
@@ -132,11 +134,11 @@ public class PlayerMovement : MonoBehaviour
 
 
 		//Oyuncunun saða sola dönme animasyonu
-		if (horizontalInput > 0.01f)
+		if (body.velocity.x > 0.01f)
         {
             transform.localScale = Vector3.one;
         }
-        else if (horizontalInput < -0.01f)
+        else if (body.velocity.x < -0.01f)
         {
             transform.localScale = new Vector3(-1,1,1);
         }
@@ -161,32 +163,16 @@ public class PlayerMovement : MonoBehaviour
 		}
 
 
-		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing && !isClimbing() && !isOnPlatform)
+		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing && !isClimbing() && !isOnPlatform && !isDashing)
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
         }
-        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing && !isClimbing() && !isOnPlatform)
+        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing && !isClimbing() && !isOnPlatform && !isDashing)
         {
             body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
             if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
         }
-        else if (isDashing && !bouncing)//dash atarkenki hareket
-        {
-            body.velocity = new Vector2(0, 0);
-            if (dashingDir.x == 0 && dashingDir.y > 0)
-            {
-                body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 3 / 4;
-            }
-            else if (dashingDir.x != 0 && dashingDir.y == 0)
-            {
-                body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 5 / 4;
-            }
-            else
-            {
-                body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
-            }
-        }
-        else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0)//jump pad hareketi
+        else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//jump pad hareketi
         {
             if (MathF.Abs(body.velocity.x) < 6)
             {
@@ -207,23 +193,18 @@ public class PlayerMovement : MonoBehaviour
 			 //body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
 			 //if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
 		 }*/
-		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing())
+		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
 		{
             body.velocity = new Vector2((horizontalInput * 10) + platformRb.velocity.x,body.velocity.y);
         }
 
 
-
-
-
-
 		
-
-		if (body.velocity.y > 19)//hýz limiti
+		if (body.velocity.y > 17)//hýz limiti
         {
             body.velocity = new Vector2 (body.velocity.x, body.velocity.y-1);
         }
-        else if(body.velocity.y < -19)
+        else if(body.velocity.y < -17)
         {
 			body.velocity = new Vector2(body.velocity.x, body.velocity.y + 1);
 		}
@@ -241,43 +222,16 @@ public class PlayerMovement : MonoBehaviour
         if (isGroundedControl) print("Is grounded control true");
         else print("Is grounded control false");
 
-		//dash atmazkenki hareket
-		/*	 if (!isDashing && !onWall() && !isWallJumping)
-			 {
-				 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
-			 }
-			 else if(isDashing)//dash atarkenki hareket
-			 {
-				 body.velocity = new Vector2(0, 0);
-				 if(dashingDir.x == 0 && dashingDir.y > 0)
-				 {
-					 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity*3/4;
-				 }
-				 else if(dashingDir.x != 0 && dashingDir.y == 0)
-				 {
-					 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity * 5/4;
-				 }
-				 else 
-				 {
-					 body.velocity = new Vector2(dashingDir.x, dashingDir.y).normalized * dashingVelocity;
-				 }    
-
-			 }
-			 else if (isWallJumping)
-			 {
-				 new WaitForSeconds(1f);
-				 body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
-
-			 }*/
+	
 
 		if (isGrounded()) //yere düþünce jumpcount sýfýrlama ve coyote time
             { 
             airJumpCounter = 1;
             groundJumpCounter = 1;
             coyoteTimeCounter = coyoteTime;
+            canDashCondition = true;
             print("yerde");
 			if (isGroundedControl) bouncing = false;
-			if (canDashCondition) canDash = true;
 		}
         else
         {
@@ -289,14 +243,30 @@ public class PlayerMovement : MonoBehaviour
 			if (isGroundedControl) bouncing = false;
 		}
 
+
             //dash
-            if (Input.GetKeyDown(KeyCode.Mouse1) && canDash && canDashCondition && dashingCooldown >0.5f)
+      /*  if (Input.GetKeyDown(KeyCode.Mouse1) && canDashCondition && dashingCooldown >0.5f)
             {
-                Dash();
- 
-                StartCoroutine(StopDashing());
-            }
+			StartCoroutine(Dash());
+
+			StartCoroutine(StopDashing());
+            }*/
         dashingCooldown += Time.deltaTime;
+
+		if (!isDashing)
+		{
+			float horizontalInput = Input.GetAxisRaw("Horizontal");
+			float verticalInput = Input.GetAxisRaw("Vertical");
+			// Hareket yönünü hesapla
+			Vector2 inputDirection = new Vector2(horizontalInput, verticalInput).normalized;
+
+			// Sað týk ile Dash baþlat
+			if (inputDirection != Vector2.zero && Input.GetMouseButtonDown(1) && canDashCondition && dashingCooldown > 0.5f)
+			{
+				dashDirection = inputDirection; // Dash yönünü sabitle
+				StartCoroutine(Dash());
+			}
+		}
 
 
 		if (onWall() && !isGrounded())
@@ -362,9 +332,9 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
-    private void Dash()
+   /* private void Dash()
     {   
-            bouncing = false ;
+            bouncing = false;
             dashingCooldown = 0;
             isDashing = true;
             canDash = false;
@@ -380,21 +350,43 @@ public class PlayerMovement : MonoBehaviour
             }
             else{
                 body.velocity = dashingDir.normalized*dashingVelocity;
-            }
-        
-    }
+            }       
+    }*/
 
-    private IEnumerator StopDashing()
+	public IEnumerator Dash()
+	{
+        body.gravityScale = 0f;
+        body.velocity = Vector2.zero;
+		dashingCooldown = 0;
+		bouncing = false;
+		isDashing = true;
+		canDashCondition = false;
+		trailRenderer.emitting = true;
+		anim.SetBool("dash", true);
+
+		// Dash hýzýný hesapla
+		Vector2 dashVelocity = dashDirection * (dashDistance / dashDuration);
+		body.velocity = dashVelocity;    // Dash sýrasýnda hýzýný ayarla
+
+		yield return new WaitForSeconds(dashDuration);
+
+		trailRenderer.emitting = false;
+		isDashing = false;
+		anim.SetBool("dash", false);
+		body.gravityScale = 5;
+	}
+
+	/*private IEnumerator StopDashing()
     {
 
-		yield return new WaitForSeconds(dashingTime);
+		yield return new WaitForSeconds(dashDuration);
 		trailRenderer.emitting = false;
 		isDashing = false;
         canDashCondition=true;
         anim.SetBool("dash", false);  
         body.gravityScale = 5;
 
-	}
+	}*/
 
     private void Climb()
     {
@@ -451,7 +443,7 @@ public class PlayerMovement : MonoBehaviour
 
 	IEnumerator WallJumpBounce()
 	{
-		bouncing = true;
+		bouncing = true;//duvara çarptýðýnda yere düþtüðünde dash attýðýnda bouncing false olur.
 		body.AddForce(new Vector2(-20 * transform.localScale.x, 15f), ForceMode2D.Impulse);
 		print("Walljumpbounce coroutine started");
 		isGroundedControl = false;		
