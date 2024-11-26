@@ -64,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
 
 	//wall jump
 	private bool isWallJumping;
-    private float wallJumpingDirection;
+    [SerializeField] Vector2 wallJumpPower;
     private float wallJumpingTime = 1f;
     private float wallJumpingCounter;
     private float wallJumpingDuration = 0.1f;
@@ -73,6 +73,7 @@ public class PlayerMovement : MonoBehaviour
 	private float wallJumpExpecterTime =0.05f;
     private bool afterWallJumping;
 	IEnumerator wallJumpBounceCoroutine;
+    public float wallJumpSlownessCounter = 0f;
 
 	//hanging
 	private float hangingTime = 0.2f;
@@ -176,23 +177,20 @@ public class PlayerMovement : MonoBehaviour
         {
             if (MathF.Abs(body.velocity.x) < 6)
             {
-				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 3), body.velocity.y);
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 3/2), body.velocity.y);
+                print("B");
 			}
 		}
 		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
 		{
-				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 2), body.velocity.y);
-
-            if(body.velocity.y ==0)
+            while (horizontalInput*3/2 > Mathf.Pow(1f, wallJumpSlownessCounter))
             {
-				//body.velocity = new Vector2(body.velocity.x / 100*85, body.velocity.y);
+				body.velocity = new Vector2(body.velocity.x + (Mathf.Pow(1f,wallJumpSlownessCounter)), body.velocity.y);
+                print("A");
 			}
+            body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);
+           
 		}
-		/* else if (bouncing && horizontalInput * body.velocity.x < 0 && !isWallJumping && !isClimbing() && !isOnPlatform)
-		 {
-			 //body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
-			 //if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
-		 }*/
 		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
 		{
             body.velocity = new Vector2((horizontalInput * 10) + platformRb.velocity.x,body.velocity.y);
@@ -243,17 +241,21 @@ public class PlayerMovement : MonoBehaviour
 			if (isGroundedControl) bouncing = false;
 		}
 
+        if (bouncing)
+        {
+            wallJumpSlownessCounter += Time.deltaTime;
+        }
 
-            //dash
-      /*  if (Input.GetKeyDown(KeyCode.Mouse1) && canDashCondition && dashingCooldown >0.5f)
-            {
-			StartCoroutine(Dash());
+        //dash
+        /*  if (Input.GetKeyDown(KeyCode.Mouse1) && canDashCondition && dashingCooldown >0.5f)
+              {
+              StartCoroutine(Dash());
 
-			StartCoroutine(StopDashing());
-            }*/
+              StartCoroutine(StopDashing());
+              }*/
         dashingCooldown += Time.deltaTime;
 
-		if (!isDashing)
+		if (!isDashing)//dash atarken hareket yönünü kitler
 		{
 			float horizontalInput = Input.GetAxisRaw("Horizontal");
 			float verticalInput = Input.GetAxisRaw("Vertical");
@@ -290,22 +292,6 @@ public class PlayerMovement : MonoBehaviour
 		Climb();
 		WallJump();
 	}
-
-    //zýplama kodu
-  /*  private void Jump()
-    {
-		if (Input.GetKeyDown(KeyCode.Space) && !(onWall() && Input.GetKey(KeyCode.Mouse0))) 
-        {
-			if (jumpcount > 0)
-			{
-				body.velocity = new Vector2(body.velocity.x, jumpPower);
-				print("Zýpladý");
-				jumpcount--;
-				print("Jump count:" + jumpcount);
-			}
-		}
-		
-    }*/
 
 
     private void Jump()
@@ -443,8 +429,9 @@ public class PlayerMovement : MonoBehaviour
 
 	IEnumerator WallJumpBounce()
 	{
+        wallJumpSlownessCounter = 0;
 		bouncing = true;//duvara çarptýðýnda yere düþtüðünde dash attýðýnda bouncing false olur.
-		body.AddForce(new Vector2(-20 * transform.localScale.x, 15f), ForceMode2D.Impulse);
+		body.AddForce(new Vector2(-wallJumpPower.x * transform.localScale.x, wallJumpPower.y), ForceMode2D.Impulse);
 		print("Walljumpbounce coroutine started");
 		isGroundedControl = false;		
 		yield return new WaitForSecondsRealtime(0.2f);

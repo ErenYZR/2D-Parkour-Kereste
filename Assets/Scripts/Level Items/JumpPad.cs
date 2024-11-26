@@ -71,8 +71,7 @@ public class JumpPad : MonoBehaviour
 					StartCoroutine(bounceCoroutine);
 					//collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
 					collision.gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(1, 0) * bounce;
-
-                    break;
+					break;
 
 				case 4:
 					StartCoroutine(bounceCoroutine);
@@ -100,6 +99,7 @@ public class JumpPad : MonoBehaviour
 	IEnumerator Bounce()
 	{
 		print("Coroutine started" + gameObject.name);
+		playerMovement.wallJumpSlownessCounter = 0;
 		playerMovement.isGroundedControl = false;
 		playerMovement.bouncing = true;
 		active = true;
