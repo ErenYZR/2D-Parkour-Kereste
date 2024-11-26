@@ -71,7 +71,6 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 wallJumpingPower = new Vector2(2f, 3f);
     private float wallJumpExpecter;
 	private float wallJumpExpecterTime =0.05f;
-    private bool afterWallJumping;
 	IEnumerator wallJumpBounceCoroutine;
     public float wallJumpSlownessCounter = 0f;
 
@@ -173,7 +172,7 @@ public class PlayerMovement : MonoBehaviour
             body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
             if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
         }
-        else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//jump pad hareketi
+        else if (bouncing && /*!isWallJumping &&*/ !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//jump pad hareketi
         {
             if (MathF.Abs(body.velocity.x) < 6)
             {
@@ -181,11 +180,11 @@ public class PlayerMovement : MonoBehaviour
                 print("B");
 			}
 		}
-		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
+		else if (bouncing &&/* !isWallJumping &&*/ !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
 		{
             while (horizontalInput*3/2 > Mathf.Pow(1f, wallJumpSlownessCounter))
             {
-				body.velocity = new Vector2(body.velocity.x + (Mathf.Pow(1f,wallJumpSlownessCounter)), body.velocity.y);
+				//body.velocity = new Vector2(body.velocity.x + (Mathf.Pow(1f,wallJumpSlownessCounter)), body.velocity.y);
                 print("A");
 			}
             body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);
@@ -362,18 +361,6 @@ public class PlayerMovement : MonoBehaviour
 		body.gravityScale = 5;
 	}
 
-	/*private IEnumerator StopDashing()
-    {
-
-		yield return new WaitForSeconds(dashDuration);
-		trailRenderer.emitting = false;
-		isDashing = false;
-        canDashCondition=true;
-        anim.SetBool("dash", false);  
-        body.gravityScale = 5;
-
-	}*/
-
     private void Climb()
     {
 
@@ -441,26 +428,6 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 
-	IEnumerator WallJumpWaiter()
-    {
-        afterWallJumping = true;
-        yield return new WaitForSecondsRealtime(2);
-        afterWallJumping = false;
-    }
-    IEnumerator afterWallJump()
-    {
-		if (Mathf.Abs(body.velocity.x) < maxSpeedWallJump && !isWallJumping && !isDashing && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)))//wall jumpingten bir süre sonra da iþe yaramalý
-		{
-			body.velocity = new Vector2(body.velocity.x + (accelerationWallJump * horizontalInput) / 12, body.velocity.y);
-		}
-		else if (horizontalInput * body.velocity.x < 0 && !isDashing && !isWallJumping)
-		{
-			body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 8), body.velocity.y);
-			if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
-		}
-        yield return new WaitForSecondsRealtime(2);
-	}
-
 
     //duvara týrmanma
    /* private void Climb()
@@ -527,13 +494,6 @@ public class PlayerMovement : MonoBehaviour
       //  Invoke(nameof(StopWallJumping), wallJumpingDuration);
 
     }*/
-
-
-    private void StopWallJumping()
-    {
-
-        isWallJumping = false;
-    }
 
 
     //yerde mi
