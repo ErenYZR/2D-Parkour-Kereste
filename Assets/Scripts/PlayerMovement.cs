@@ -48,8 +48,6 @@ public class PlayerMovement : MonoBehaviour
 
     private float jumpBufferTime = 0.1f;
     private float jumpBufferCounter;
-
-    private bool climbingState;
  
 
     //dash variables
@@ -75,7 +73,6 @@ public class PlayerMovement : MonoBehaviour
 	private float wallJumpExpecterTime =0.05f;
 	IEnumerator wallJumpBounceCoroutine;
     public float wallJumpSlownessCounter = 0f;
-    private float wallJumpDirection;
 
 	//hanging
 	private float hangingTime = 0.2f;
@@ -179,7 +176,7 @@ public class PlayerMovement : MonoBehaviour
         {
             if (MathF.Abs(body.velocity.x) < 6)
             {
-				//body.velocity = new Vector2(body.velocity.x + (horizontalInput * 3/2), body.velocity.y);
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 3/2), body.velocity.y);
                 print("B");
 			}
 		}
@@ -190,7 +187,7 @@ public class PlayerMovement : MonoBehaviour
 				//body.velocity = new Vector2(body.velocity.x + (Mathf.Pow(1f,wallJumpSlownessCounter)), body.velocity.y);
                 print("A");
 			}
-           // body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);
+            body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);
            
 		}
 		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
@@ -238,7 +235,7 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter -= Time.deltaTime;
         }
 
-       if (onWall())
+        if (onWall())
         {
 			if (isGroundedControl) bouncing = false;
 		}
@@ -248,16 +245,14 @@ public class PlayerMovement : MonoBehaviour
             wallJumpSlownessCounter += Time.deltaTime;
         }
 
-        climbingState = (Input.GetKey(KeyCode.Mouse0) && onWall() && !isWallJumping);
-
-		//dash
-		/*  if (Input.GetKeyDown(KeyCode.Mouse1) && canDashCondition && dashingCooldown >0.5f)
+        //dash
+        /*  if (Input.GetKeyDown(KeyCode.Mouse1) && canDashCondition && dashingCooldown >0.5f)
               {
               StartCoroutine(Dash());
 
               StartCoroutine(StopDashing());
               }*/
-		dashingCooldown += Time.deltaTime;
+        dashingCooldown += Time.deltaTime;
 
 		if (!isDashing)//dash atarken hareket yönünü kitler
 		{
@@ -273,12 +268,6 @@ public class PlayerMovement : MonoBehaviour
 				StartCoroutine(Dash());
 			}
 		}
-
-        if (!isWallJumping)//wall jumpa baþlandýðý anda zýplayacaðý yönü kitlemek için
-        {
-            wallJumpDirection = transform.localScale.x;
-            
-        }
 
 
 		if (onWall() && !isGrounded())
@@ -400,13 +389,15 @@ public class PlayerMovement : MonoBehaviour
     {
         if ((/*wallJumpExpecter > 0 ||*/ isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
         {
-            climbingState = false;
+			//bouncing = false;
+			//isWallJumping = true;
 			StopCoroutine(WallJumpBounce());
 			wallJumpBounceCoroutine = WallJumpBounce();
 			StartCoroutine(wallJumpBounceCoroutine);
+			//wallJumpingCounter = wallJumpingDuration;
+            //wallJumpExpecter = 0;
 			if (bouncing) print("iswalljumping:true");
             else print("iswalljumping:false");
-            print("Walljump baþlatýldý");
         }
 
        /* if (isWallJumping) 
@@ -427,7 +418,7 @@ public class PlayerMovement : MonoBehaviour
 	{
         wallJumpSlownessCounter = 0;
 		bouncing = true;//duvara çarptýðýnda yere düþtüðünde dash attýðýnda bouncing false olur.
-		body.AddForce(new Vector2(-wallJumpPower.x * wallJumpDirection, wallJumpPower.y), ForceMode2D.Impulse);//wall jump baþaldýktan sonra zýplayacaðý yönü kitler
+		body.AddForce(new Vector2(-wallJumpPower.x * transform.localScale.x, wallJumpPower.y), ForceMode2D.Impulse);
 		print("Walljumpbounce coroutine started");
 		isGroundedControl = false;		
 		yield return new WaitForSecondsRealtime(0.2f);
@@ -538,7 +529,7 @@ public class PlayerMovement : MonoBehaviour
 
     public bool isClimbing()
     {
-        return climbingState;
+        return (Input.GetKey(KeyCode.Mouse0) && onWall() && !isWallJumping);
     }
 
 	private void OnTriggerEnter2D(Collider2D collision)
