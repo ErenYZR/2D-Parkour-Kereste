@@ -180,15 +180,9 @@ public class PlayerMovement : MonoBehaviour
                 print("B");
 			}
 		}
-		else if (bouncing &&/* !isWallJumping &&*/ !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
+		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
 		{
-            while (horizontalInput*3/2 > Mathf.Pow(1f, wallJumpSlownessCounter))
-            {
-				//body.velocity = new Vector2(body.velocity.x + (Mathf.Pow(1f,wallJumpSlownessCounter)), body.velocity.y);
-                print("A");
-			}
-            body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);
-           
+            body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);       
 		}
 		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
 		{
