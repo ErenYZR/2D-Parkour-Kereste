@@ -423,72 +423,6 @@ public class PlayerMovement : MonoBehaviour
 
 
 
-    //duvara týrmanma
-   /* private void Climb()
-    {
-        if (isClimbing() && !(Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f) && !isWallJumping)
-        {
-			body.velocity = new Vector2(0, 0); //böyleydi   body.velocity = new Vector2(body.velocity.x, 0);
-			body.gravityScale = 0;
-			body.velocity = new Vector2(body.velocity.x, verticalInput * climbSpeed);			
-		}		    
-        else if (isClimbing() && (Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f))
-        {
-            body.gravityScale = 5;
-			isWallJumping = true;
-			 //  body.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x * 10, wallJumpingPower.y * 10);			
-			   //body.AddForce(new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y)*10, ForceMode2D.Impulse);
-			  // print("Wall Jumping Direction:" + wallJumpingDirection * wallJumpingPower.x + "," + wallJumpingPower.y);
-              //new WaitForSeconds(wallJumpingDuration);
-			   wallJumpingCounter = 0f;
-			   isWallJumping = false;
-		}
-        else
-        {
-            body.gravityScale = 5;
-        }
-	}*/
-
-
-    //duvarda zýplama
-   /* private void WallJump()
-    {
-        if (isClimbing() && !(Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f) && !isWallJumping)
-		{
-            isWallJumping = false;
-            wallJumpingDirection = -transform.localScale.x;
-            wallJumpingCounter = wallJumpingTime;
-
-           // CancelInvoke(nameof(StopWallJumping));
-        }
-        else
-        {
-            wallJumpingCounter -= Time.deltaTime;
-        }
-
-        if (isWallJumping)
-        {
-			body.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x * 10, wallJumpingPower.y * 10);
-			new WaitForSeconds(wallJumpingDuration);
-			wallJumpingCounter = 0f;
-			isWallJumping = false;
-		}
-
-
-       /* if(Input.GetKeyDown(KeyCode.Space) && wallJumpingCounter > 0f)
-        {
-            isWallJumping = true;
-            body.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x * 2, wallJumpingPower.y*3);
-            wallJumpingCounter = 0f;
-
-
-            print("Duvarda zýpladý");
-        }
-
-      //  Invoke(nameof(StopWallJumping), wallJumpingDuration);
-
-    }*/
-
 
     //yerde mi
     private bool isGrounded()
@@ -534,6 +468,11 @@ public class PlayerMovement : MonoBehaviour
 			coinManager.coinCount++;
 
 		}
+        else if(collision.gameObject.CompareTag("DashCoin"))
+        {
+            Destroy(collision.gameObject);
+            canDashCondition = true;
+        }
 	}
 
 	private void OnCollisionEnter2D(Collision2D collision)
