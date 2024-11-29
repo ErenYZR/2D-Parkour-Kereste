@@ -8,6 +8,7 @@ TagManager:
   - Spike
   - Coin
   - Stuck
+  - DashCoin
   layers:
   - Default
   - TransparentFX
