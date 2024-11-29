@@ -255,16 +255,16 @@ public class PlayerMovement : MonoBehaviour
 			groundJumpCounter--;
 		}
 
-		if (Input.GetKeyUp(KeyCode.Space) && airTime > 0)//yerde zýpladýysa havada zýplamadýysa ve yukarý doðru gidiyorsa elini spaceden çekince hýzý yarýya düþecek
+		if (Input.GetKeyUp(KeyCode.Space) && airTime > 0 && !isDashing)//yerde zýpladýysa havada zýplamadýysa ve yukarý doðru gidiyorsa elini spaceden çekince hýzý yarýya düþecek
 		{
 			body.velocity = new Vector2(body.velocity.x, body.velocity.y / 2);
 		}
 
-		if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && coyoteTimeCounter <=0 && !isGrounded() && airJumpCounter > 0 && !isWallJumping)
+		/*if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && coyoteTimeCounter <=0 && !isGrounded() && airJumpCounter > 0 && !isWallJumping)
         {
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
             airJumpCounter--;
-		}
+		}*/
 	}
 
 
