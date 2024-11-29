@@ -25,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
 	private BoxCollider2D boxCollider;
 	private TrailRenderer trailRenderer;
 
+    [SerializeField] private float OriginalGravity;
     [SerializeField] private BoxCollider2D climb;
     [SerializeField] private float maxSpeed;
 	[SerializeField] private float maxSpeedWallJump;
@@ -66,7 +67,6 @@ public class PlayerMovement : MonoBehaviour
 	private bool isWallJumping;
     [SerializeField] Vector2 wallJumpPower;
     private float wallJumpingCounter;
-    private Vector2 wallJumpingPower = new Vector2(2f, 3f);
     private float wallJumpExpecter;
 	private float wallJumpExpecterTime =0.05f;
 	IEnumerator wallJumpBounceCoroutine;
@@ -80,7 +80,6 @@ public class PlayerMovement : MonoBehaviour
     //platform
     public bool isOnPlatform;
     public Rigidbody2D platformRb;
-
 	public CoinManager coinManager;
 
 
@@ -97,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
     {
-		body.gravityScale = 5;
+		body.gravityScale = OriginalGravity;
         canDashCondition = true;
         bouncing = false;
         wallJumpBounceCoroutine = WallJumpBounce();
@@ -158,7 +157,7 @@ public class PlayerMovement : MonoBehaviour
                 print("B");
 			}
 		}
-		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0)//jump pad hareketi
+		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0 && !isDashing)//jump pad hareketi
 		{
             body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);       
 		}
@@ -173,6 +172,10 @@ public class PlayerMovement : MonoBehaviour
         else print("Is grounded control false");
 
 	
+		if(!isDashing && !isClimbing())
+		{
+			body.gravityScale = OriginalGravity;
+		}
 
 		if (isGrounded()) //yere düþünce jumpcount sýfýrlama ve coyote time
             { 
@@ -264,26 +267,6 @@ public class PlayerMovement : MonoBehaviour
 		}
 	}
 
-   /* private void Dash()
-    {   
-            bouncing = false;
-            dashingCooldown = 0;
-            isDashing = true;
-            canDash = false;
-            canDashCondition = false;
-            trailRenderer.emitting = true;
-            anim.SetBool("dash",true);
-            dashingDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-            body.gravityScale = 0;
-			if (dashingDir == Vector2.zero)
-            {
-                dashingDir = new Vector2(transform.localScale.x, 0);
-                
-            }
-            else{
-                body.velocity = dashingDir.normalized*dashingVelocity;
-            }       
-    }*/
 
 	public IEnumerator Dash()
 	{
@@ -306,7 +289,7 @@ public class PlayerMovement : MonoBehaviour
 		trailRenderer.emitting = false;
 		isDashing = false;
 		anim.SetBool("dash", false);
-		body.gravityScale = 5;
+		//body.gravityScale = OriginalGravity;
 	}
 
     private void Climb()
@@ -327,7 +310,7 @@ public class PlayerMovement : MonoBehaviour
 		}
         else if (!isClimbing())
         {
-            body.gravityScale = 5;
+            //body.gravityScale = OriginalGravity; gerekli mi testi yapýyorum
         }
     }
 
