@@ -21,6 +21,11 @@ public class JumpPad : MonoBehaviour
 	Direction direction = direction.Left;
 	*/
 
+	public enum Direction
+	{
+		Up, Down, Left, Right, TopRight, TopLeft
+	}
+
 	[SerializeField] int direction;//aldýðý deðere göre sýrasýyla yukarý aþaðý sað sol 1 2 3 4
 	PlayerMovement playerMovement;
 	[SerializeField] GameObject player;
