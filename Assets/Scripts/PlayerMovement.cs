@@ -55,10 +55,10 @@ public class PlayerMovement : MonoBehaviour
  
 
     //dash variables
-    private float dashingCooldown;
+    [SerializeField] public float dashingCooldown;
 	private Vector2 dashDirection;
 	private bool isDashing = false;
-    [SerializeField]private bool canDashCondition;
+    [SerializeField] public bool canDashCondition;
 	[SerializeField] private float dashDistance = 5f;
 	[SerializeField] private float dashDuration = 0.2f;
 
@@ -449,13 +449,7 @@ public class PlayerMovement : MonoBehaviour
 		{
             Destroy(collision.gameObject);
 			coinManager.coinCount++;
-
 		}
-        else if(collision.gameObject.CompareTag("DashCoin"))
-        {
-            Destroy(collision.gameObject);
-            canDashCondition = true;
-        }
 	}
 
 	private void OnCollisionEnter2D(Collision2D collision)

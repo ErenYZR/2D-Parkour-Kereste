@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7177045344641893187}
   - component: {fileID: 2358925762715161168}
   - component: {fileID: 466052088066977329}
+  - component: {fileID: 1964402307457503751}
   m_Layer: 0
   m_Name: Dash Coin
   m_TagString: DashCoin
@@ -120,3 +121,17 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
+--- !u!114 &1964402307457503751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 166709730748426685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd018e2880158bf4ab753957c5c4c42b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  delay: 0
+  player: {fileID: 0}
