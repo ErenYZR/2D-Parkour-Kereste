@@ -8,18 +8,6 @@ public class JumpPad : MonoBehaviour
 {
 
 	[SerializeField] float bounce = 40f;
-	/*
-	SADE_NOTE: direction deðiþkeni enum olarak tanýmlanýrsa kod içerisinde doðrudan direction.Left þeklinde yazýlabilir bu da kodu daha okunaklý yapar
-	enum Direction
-	{
-		Up = 1,
-		Down = 2,
-		Right = 3,
-		Left = 4
-	}
-	int direction = 4; yerine
-	Direction direction = direction.Left;
-	*/
 
 	public enum Direction
 	{
@@ -27,7 +15,6 @@ public class JumpPad : MonoBehaviour
 	}
 
 	[SerializeField] private Direction directionEnum;
-	[SerializeField] int direction;//aldýðý deðere göre sýrasýyla yukarý aþaðý sað sol 1 2 3 4
 	PlayerMovement playerMovement;
 	[SerializeField] GameObject player;
 	[SerializeField] Rigidbody2D body;
