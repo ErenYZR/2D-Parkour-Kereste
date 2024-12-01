@@ -23,9 +23,10 @@ public class JumpPad : MonoBehaviour
 
 	public enum Direction
 	{
-		Up, Down, Left, Right, TopRight, TopLeft
+		Up, Down, Left, Right, TopRight, TopLeft, TopSlightRight
 	}
 
+	[SerializeField] private Direction directionEnum;
 	[SerializeField] int direction;//aldýðý deðere göre sýrasýyla yukarý aþaðý sað sol 1 2 3 4
 	PlayerMovement playerMovement;
 	[SerializeField] GameObject player;
@@ -59,40 +60,40 @@ public class JumpPad : MonoBehaviour
 		{
 			if (bounceCoroutine != null) StopCoroutine(bounceCoroutine);
 			bounceCoroutine = Bounce();
-			switch (direction)
+			switch (directionEnum)
 			{
-				case 1:
+				case Direction.Up:
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * bounce, ForceMode2D.Impulse);
 					break;
 
-				case 2:
+				case Direction.Down:
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.down * bounce, ForceMode2D.Impulse);
 					break;
 
-				case 3:
+				case Direction.Right:
 					body.velocity = Vector2.zero;
 					StartCoroutine(bounceCoroutine);
 					//collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
 					collision.gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(1, 0) * bounce;
 					break;
 
-				case 4:
+				case Direction.Left:
 					StartCoroutine(bounceCoroutine);
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.left * bounce, ForceMode2D.Impulse);
 					break;
-				case 5://sað üst
+				case Direction.TopRight://sað üst
 					StartCoroutine(bounceCoroutine);
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,1) * bounce, ForceMode2D.Impulse);
 					break;
-				case 6:
+				case Direction.TopLeft:
 					StartCoroutine(bounceCoroutine);
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(-1, 1) * bounce, ForceMode2D.Impulse);
 					break;
-				case 7:
+				case Direction.TopSlightRight:
 					StartCoroutine(bounceCoroutine);
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1, 0.3f) * bounce, ForceMode2D.Impulse);
