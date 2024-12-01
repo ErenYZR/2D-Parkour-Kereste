@@ -153,13 +153,14 @@ public class PlayerMovement : MonoBehaviour
         {
             if (MathF.Abs(body.velocity.x) < 6)
             {
-				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 3/2), body.velocity.y);
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 1/2), body.velocity.y);
                 print("B");
 			}
 		}
 		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0 && !isDashing)//jump pad hareketi
 		{
-            body.velocity = new Vector2(horizontalInput * 3/2, body.velocity.y);       
+            body.velocity = new Vector2(horizontalInput * 1/2, body.velocity.y);
+			print("A");
 		}
 		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
 		{
