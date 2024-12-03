@@ -21,6 +21,7 @@ public class JumpPad : MonoBehaviour
 	private Animator anim;
 	public bool active;
 	IEnumerator bounceCoroutine;
+	public float jumpPadLerp;
 
 
 	private void Awake()
@@ -40,11 +41,16 @@ public class JumpPad : MonoBehaviour
 		if (playerMovement.bouncing == true) print("Zýplýyor");
 
 		anim.SetBool("active", active);
+
+		float percentageComplete = playerMovement.jumpPadSlownessCounter / 1.1f;
+		float clampedValue = Mathf.Clamp01(percentageComplete);
+		jumpPadLerp = Mathf.Lerp(0.01f, 1f, percentageComplete);
 	}
 	private void OnCollisionStay2D(Collision2D collision)//enter
 	{
 		if (collision.gameObject.CompareTag("Player"))
 		{
+			playerMovement.isWallJumping = false;
 			if (bounceCoroutine != null) StopCoroutine(bounceCoroutine);
 			bounceCoroutine = Bounce();
 			switch (directionEnum)
@@ -92,7 +98,9 @@ public class JumpPad : MonoBehaviour
 	IEnumerator Bounce()
 	{
 		print("Coroutine started" + gameObject.name);
-		playerMovement.wallJumpSlownessCounter = 0;
+		print("Bounce:" + bounce);
+		playerMovement.bounce = bounce;
+		playerMovement.jumpPadSlownessCounter = 0.01f;
 		playerMovement.isGroundedControl = false;
 		playerMovement.bouncing = true;
 		active = true;

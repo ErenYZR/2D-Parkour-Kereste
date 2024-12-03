@@ -10,11 +10,8 @@ using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerMovement : MonoBehaviour
 {
+	public float bounce;
 	public bool bouncing;
-	[SerializeField] JumpPad bounce;
-    [SerializeField] JumpPad active;
-    [SerializeField] JumpPad direction;
-    public JumpPad jumpPad;
     public bool isGroundedControl;
 
     public LayerMask groundLayer;
@@ -64,13 +61,15 @@ public class PlayerMovement : MonoBehaviour
 
 
 	//wall jump
-	private bool isWallJumping;
+	public bool isWallJumping;
     [SerializeField] Vector2 wallJumpPower;
     private float wallJumpingCounter;
     private float wallJumpExpecter;
 	private float wallJumpExpecterTime =0.05f;
 	IEnumerator wallJumpBounceCoroutine;
-    public float wallJumpSlownessCounter = 0f;
+    public float jumpPadSlownessCounter = 0f;
+	public float wallJumpSlownessCounter = 0f;
+
 
     private float airTime =0.54f;
     //death
@@ -100,6 +99,7 @@ public class PlayerMovement : MonoBehaviour
         canDashCondition = true;
         bouncing = false;
         wallJumpBounceCoroutine = WallJumpBounce();
+		isWallJumping = false;
 	}
 
     // Update is called once per frame
@@ -109,6 +109,14 @@ public class PlayerMovement : MonoBehaviour
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
+		float percentageComplete = jumpPadSlownessCounter * 40 / (bounce);
+		float clampedValue = Mathf.Clamp01(percentageComplete);
+		//print(Mathf.Lerp(0.01f, 1f, percentageComplete));
+
+		float wallJumpPercentageComplete = wallJumpSlownessCounter * 40 / bounce;
+		float wallJumpClampedValue = Mathf.Clamp01(wallJumpPercentageComplete);
+
+		if (isWallJumping) wallJumpSlownessCounter += Time.deltaTime;
 
 		//Oyuncunun saða sola dönme animasyonu
 		if (body.velocity.x > 0.01f)
@@ -149,18 +157,31 @@ public class PlayerMovement : MonoBehaviour
             body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
             if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
         }
-        else if (bouncing && /*!isWallJumping &&*/ !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//jump pad hareketi
+		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0 && !isDashing)//jump pad hareketi
+		{//jumppadden sekip 
+			body.velocity = new Vector2(body.velocity.x + horizontalInput * Mathf.Lerp(0.01f, 2.5f, clampedValue), body.velocity.y);
+			print("Jumppad zýt");
+		}
+		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//jump pad hareketi
         {
             if (MathF.Abs(body.velocity.x) < 6)
             {
 				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 1/2), body.velocity.y);
-                print("B");
+                print("Jumppad ayný");
 			}
 		}
-		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0 && !isDashing)//jump pad hareketi
+		else if (bouncing && isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0 && !isDashing)//wall jump hareketi
 		{
-            body.velocity = new Vector2(horizontalInput * 1/2, body.velocity.y);
-			print("A");
+			body.velocity = new Vector2(body.velocity.x + horizontalInput * Mathf.Lerp(0.01f, 2.5f, wallJumpClampedValue), body.velocity.y);
+			print("Walljump zýt");
+		}
+		else if (bouncing && isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//wall jump hareketi
+		{
+			if (MathF.Abs(body.velocity.x) < 6)
+			{
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 1 / 2), body.velocity.y);
+				print("Walljump ayný");
+			}
 		}
 		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
 		{
@@ -186,6 +207,7 @@ public class PlayerMovement : MonoBehaviour
             canDashCondition = true;
             print("yerde");
 			if (isGroundedControl) bouncing = false;
+			if (isGroundedControl) isWallJumping = false;
 		}
         else
         {
@@ -195,11 +217,12 @@ public class PlayerMovement : MonoBehaviour
         if (onWall())
         {
 			if (isGroundedControl) bouncing = false;//istenen süreden sonra duvara çarpýnca bouncing false oluyor
+			if (isGroundedControl) isWallJumping = false;
 		}
 
         if (bouncing)
         {
-            wallJumpSlownessCounter += Time.deltaTime;// þu anda bir iþe yaramýyor
+            jumpPadSlownessCounter += Time.deltaTime;// þu anda bir iþe yaramýyor
         }
 
         dashingCooldown += Time.deltaTime;
@@ -253,6 +276,7 @@ public class PlayerMovement : MonoBehaviour
             jumpBufferCounter = 0;
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
 			if (isGroundedControl) bouncing = false;
+			if (isGroundedControl) isWallJumping = false;
 			groundJumpCounter--;
 		}
 
@@ -274,6 +298,7 @@ public class PlayerMovement : MonoBehaviour
         body.gravityScale = 0f;
         body.velocity = Vector2.zero;
 		dashingCooldown = 0;
+		isWallJumping = false;
 		bouncing = false;
 		isDashing = true;
 		canDashCondition = false;
@@ -301,6 +326,7 @@ public class PlayerMovement : MonoBehaviour
             if (Input.GetKey(KeyCode.Mouse0)) //  if (Input.GetKeyDown(KeyCode.Mouse0))
 			{
 				if (isGroundedControl) bouncing = false;
+				if (isGroundedControl) isWallJumping = false;
 				body.velocity = new Vector2(0, 0);
 				body.gravityScale = 0;
 
@@ -321,12 +347,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if ((/*wallJumpExpecter > 0 ||*/ isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
         {
-			//bouncing = false;
-			//isWallJumping = true;
 			StopCoroutine(WallJumpBounce());
 			wallJumpBounceCoroutine = WallJumpBounce();
 			StartCoroutine(wallJumpBounceCoroutine);
-			//wallJumpingCounter = wallJumpingDuration;
             //wallJumpExpecter = 0;
 			if (bouncing) print("iswalljumping:true");
             else print("iswalljumping:false");
@@ -348,7 +371,9 @@ public class PlayerMovement : MonoBehaviour
 
 	IEnumerator WallJumpBounce()
 	{
-        wallJumpSlownessCounter = 0;
+		wallJumpSlownessCounter = 0;
+		jumpPadSlownessCounter = 0;
+		isWallJumping = true;
 		bouncing = true;//duvara çarptýðýnda yere düþtüðünde dash attýðýnda bouncing false olur.
 		body.AddForce(new Vector2(-wallJumpPower.x * transform.localScale.x, wallJumpPower.y), ForceMode2D.Impulse);
 		print("Walljumpbounce coroutine started");
@@ -356,7 +381,6 @@ public class PlayerMovement : MonoBehaviour
 		yield return new WaitForSecondsRealtime(0.2f);
 		isGroundedControl = true;
 		yield return new WaitForSeconds(1.9f);
-       // bouncing = false;
 	}
 
 
