@@ -354,25 +354,13 @@ public class PlayerMovement : MonoBehaviour
 			if (bouncing) print("iswalljumping:true");
             else print("iswalljumping:false");
         }
-
-       /* if (isWallJumping) 
-        {
-			body.AddForce(new Vector2(-5, 3f), ForceMode2D.Impulse);
-			//body.velocity = new Vector2(-transform.localScale.x * wallJumpingPower.x * 7, wallJumpingPower.y * 3.5f);
-			bouncing = true;
-            if(!bouncing) isWallJumping=false;
-			//transform.localScale = new Vector3(-transform.localScale.x, 1, 1);
-			//wallJumpingCounter -= Time.deltaTime;
-            //if(wallJumpingCounter < 0) isWallJumping = false;
-
-		}*/
     }
 
 
 	IEnumerator WallJumpBounce()
 	{
-		wallJumpSlownessCounter = 0;
-		jumpPadSlownessCounter = 0;
+		wallJumpSlownessCounter = 0.01f;
+		//jumpPadSlownessCounter = 0;
 		isWallJumping = true;
 		bouncing = true;//duvara çarptýðýnda yere düþtüðünde dash attýðýnda bouncing false olur.
 		body.AddForce(new Vector2(-wallJumpPower.x * transform.localScale.x, wallJumpPower.y), ForceMode2D.Impulse);

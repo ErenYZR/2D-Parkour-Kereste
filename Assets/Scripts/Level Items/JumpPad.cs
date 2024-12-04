@@ -18,11 +18,12 @@ public class JumpPad : MonoBehaviour
 	PlayerMovement playerMovement;
 	[SerializeField] GameObject player;
 	[SerializeField] Rigidbody2D body;
+	[SerializeField] [Tooltip("0 ile 0.9 arasý deðer ver.")] float fallTime;
 	private Animator anim;
 	public bool active;
 	IEnumerator bounceCoroutine;
 	public float jumpPadLerp;
-
+	float clampedValueFallTime;
 
 	private void Awake()
 	{		 
@@ -35,9 +36,11 @@ public class JumpPad : MonoBehaviour
 	{
 		bounceCoroutine = Bounce();
 	}
-
+	 
 	private void Update()
 	{
+		 
+
 		if (playerMovement.bouncing == true) print("Zýplýyor");
 
 		anim.SetBool("active", active);
@@ -97,6 +100,7 @@ public class JumpPad : MonoBehaviour
 	}
 	IEnumerator Bounce()
 	{
+		clampedValueFallTime = Mathf.Clamp(fallTime, 0, 0.9f);
 		print("Coroutine started" + gameObject.name);
 		print("Bounce:" + bounce);
 		playerMovement.bounce = bounce;
@@ -106,10 +110,11 @@ public class JumpPad : MonoBehaviour
 		active = true;
 		yield return new WaitForSecondsRealtime(0.1f);
 		playerMovement.isGroundedControl = true;
-		yield return new WaitForSecondsRealtime(0.9f);
-		active = false;
-		yield return new WaitForSeconds(1f);
+		yield return new WaitForSecondsRealtime(clampedValueFallTime);
 		playerMovement.bouncing = false;
+		yield return new WaitForSecondsRealtime(0.9f-clampedValueFallTime);
+		active = false;
+
 	}
 
 }
