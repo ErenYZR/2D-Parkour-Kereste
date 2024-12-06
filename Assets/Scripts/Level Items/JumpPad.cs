@@ -22,8 +22,6 @@ public class JumpPad : MonoBehaviour
 	private Animator anim;
 	public bool active;
 	IEnumerator bounceCoroutine;
-	public float jumpPadLerp;
-	float clampedValueFallTime;
 
 	private void Awake()
 	{		 
@@ -39,15 +37,13 @@ public class JumpPad : MonoBehaviour
 	 
 	private void Update()
 	{
-		 
-
 		if (playerMovement.bouncing == true) print("Zýplýyor");
 
 		anim.SetBool("active", active);
 
 		float percentageComplete = playerMovement.jumpPadSlownessCounter / 1.1f;
 		float clampedValue = Mathf.Clamp01(percentageComplete);
-		jumpPadLerp = Mathf.Lerp(0.01f, 1f, percentageComplete);
+		//jumpPadLerp = Mathf.Lerp(0.01f, 1f, percentageComplete);
 	}
 	private void OnCollisionStay2D(Collision2D collision)//enter
 	{
@@ -100,7 +96,6 @@ public class JumpPad : MonoBehaviour
 	}
 	IEnumerator Bounce()
 	{
-		clampedValueFallTime = Mathf.Clamp(fallTime, 0, 0.9f);
 		print("Coroutine started" + gameObject.name);
 		print("Bounce:" + bounce);
 		playerMovement.bounce = bounce;
@@ -110,10 +105,10 @@ public class JumpPad : MonoBehaviour
 		active = true;
 		yield return new WaitForSecondsRealtime(0.1f);
 		playerMovement.isGroundedControl = true;
-		yield return new WaitForSecondsRealtime(clampedValueFallTime);
-		playerMovement.bouncing = false;
-		yield return new WaitForSecondsRealtime(0.9f-clampedValueFallTime);
+		yield return new WaitForSecondsRealtime(0.9f);
 		active = false;
+		yield return new WaitForSecondsRealtime(fallTime);
+		playerMovement.bouncing = false;
 	}
 
 }
