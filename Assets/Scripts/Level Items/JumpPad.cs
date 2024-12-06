@@ -71,8 +71,8 @@ public class JumpPad : MonoBehaviour
 				case Direction.Right:
 					body.velocity = Vector2.zero;
 					StartCoroutine(bounceCoroutine);
-					//collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
-					collision.gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(1, 0) * bounce;
+					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
+					//collision.gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(1, 0) * bounce;
 					break;
 
 				case Direction.Left:
@@ -114,7 +114,6 @@ public class JumpPad : MonoBehaviour
 		playerMovement.bouncing = false;
 		yield return new WaitForSecondsRealtime(0.9f-clampedValueFallTime);
 		active = false;
-
 	}
 
 }

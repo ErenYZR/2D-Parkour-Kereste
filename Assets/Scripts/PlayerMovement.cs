@@ -113,10 +113,10 @@ public class PlayerMovement : MonoBehaviour
 		float clampedValue = Mathf.Clamp01(percentageComplete);
 		//print(Mathf.Lerp(0.01f, 1f, percentageComplete));
 
-		float wallJumpPercentageComplete = wallJumpSlownessCounter * 40 / bounce;
-		float wallJumpClampedValue = Mathf.Clamp01(wallJumpPercentageComplete);
-
 		if (isWallJumping) wallJumpSlownessCounter += Time.deltaTime;
+
+		float wallJumpPercentageComplete = wallJumpSlownessCounter;
+		float wallJumpClampedValue = Mathf.Clamp01(wallJumpPercentageComplete);
 
 		//Oyuncunun saða sola dönme animasyonu
 		if (body.velocity.x > 0.01f)
