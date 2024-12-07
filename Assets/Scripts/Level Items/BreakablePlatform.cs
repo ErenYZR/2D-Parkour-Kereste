@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class BreakablePlatform : MonoBehaviour
 {
-	[SerializeField] private float delay;
+	[SerializeField] [Tooltip("0.5ten fazla verince animasyon bugu oluyor.")]private float delay;
 	PlayerMovement playerMovement;
 	[SerializeField] GameObject player;
 	private bool breaking;

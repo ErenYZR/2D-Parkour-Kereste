@@ -119,11 +119,11 @@ public class PlayerMovement : MonoBehaviour
 		float wallJumpClampedValue = Mathf.Clamp01(wallJumpPercentageComplete);
 
 		//Oyuncunun saða sola dönme animasyonu
-		if (body.velocity.x > 0.01f)
+		if (body.velocity.x > 0.01f && !(isOnPlatform && isClimbing()))//platforma tutunduðunda hýzýyla tutunduðu yön her zaman ayný yönlü olmuyor.
         {
             transform.localScale = Vector3.one;
         }
-        else if (body.velocity.x < -0.01f)
+        else if (body.velocity.x < -0.01f && !(isOnPlatform && isClimbing()))
         {
             transform.localScale = new Vector3(-1,1,1);
         }
