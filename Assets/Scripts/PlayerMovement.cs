@@ -69,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
 	IEnumerator wallJumpBounceCoroutine;
     public float jumpPadSlownessCounter = 0f;
 	public float wallJumpSlownessCounter = 0f;
+	public float wallJumpFallTime;
 
 
     private float airTime =0.54f;
@@ -369,7 +370,9 @@ public class PlayerMovement : MonoBehaviour
 		isGroundedControl = false;		
 		yield return new WaitForSecondsRealtime(0.2f);
 		isGroundedControl = true;
-		yield return new WaitForSeconds(1.9f);
+		yield return new WaitForSeconds(wallJumpFallTime);
+		bouncing = false;
+		isWallJumping = false;
 	}
 
 
