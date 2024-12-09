@@ -89,7 +89,8 @@ public class PlayerMovement : MonoBehaviour
         anim = GetComponent<Animator>();
         boxCollider = GetComponent<BoxCollider2D>();
         trailRenderer = GetComponent<TrailRenderer>();
-        //jumpPad = GetComponent<JumpPad>();
+		//jumpPad = GetComponent<JumpPad>();
+		Physics2D.queriesHitTriggers = false; // Trigger collider'larý yok sayar.
 	}
 
 	// Start is called before the first frame update
@@ -147,7 +148,7 @@ public class PlayerMovement : MonoBehaviour
 
 		}
 
-
+		
 		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing && !isClimbing() && !isOnPlatform && !isDashing)
         {
             body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
@@ -327,7 +328,7 @@ public class PlayerMovement : MonoBehaviour
 			{
 				if (isGroundedControl) bouncing = false;
 				if (isGroundedControl) isWallJumping = false;
-				body.velocity = new Vector2(0, 0);
+				//body.velocity = new Vector2(0, 0);
 				body.gravityScale = 0;
 
                 if (!isOnPlatform) body.velocity = new Vector2(0, climbSpeed * verticalInput);//body.velocity = new Vector2(body.velocity.x, climbSpeed * verticalInput);
@@ -386,9 +387,8 @@ public class PlayerMovement : MonoBehaviour
     //duvarda mý
 	private bool onWall()
 	{
-		RaycastHit2D raycastHit = Physics2D.BoxCast(climb.bounds.center, boxCollider.bounds.size*0.7f, 0, new Vector2(transform.localScale.x,0), 0.2f, groundLayer);//wall layer
+		RaycastHit2D raycastHit = Physics2D.BoxCast(climb.bounds.center, boxCollider.bounds.size*0.7f, 0, new Vector2(transform.localScale.x,0), 0.3f, groundLayer);//wall layer
 		return raycastHit.collider != null;
-
 	}
 
 	/*private void OnDrawGizmos()
