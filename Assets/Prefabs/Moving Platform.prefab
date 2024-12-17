@@ -226,7 +226,7 @@ MonoBehaviour:
   PosA: {fileID: 78536797126059848}
   PosB: {fileID: 8342611187371017531}
   speed: 5
-  player: {fileID: 0}
+  player: {fileID: 798659794197940725, guid: d0b9101c06385fc4ba00eb5566f29f28, type: 3}
 --- !u!61 &6651006727713267936
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -304,7 +304,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.0017471313, y: 0.011277199}
+  m_Offset: {x: -0.0027308464, y: 0.001819551}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -315,5 +315,5 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1.0129967, y: 1.0225544}
+  m_Size: {x: 1.131994, y: 1.003639}
   m_EdgeRadius: 0

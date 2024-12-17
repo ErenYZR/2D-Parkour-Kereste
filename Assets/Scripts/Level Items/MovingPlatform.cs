@@ -43,6 +43,12 @@ public class MovingPlatform : MonoBehaviour
 			DirectionCalculate();
 		}
 
+		if (playerMovement.dead)//karakter ölünce sýfýrlanma kodu
+		{
+			transform.position = PosA.position;
+			targetPos = PosB.position;
+		}
+
 	}
 
 	private void FixedUpdate()

@@ -10,6 +10,8 @@ using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerMovement : MonoBehaviour
 {
+
+	public ParticleSystem Dust;
 	public float bounce;
 	public bool bouncing;
     public bool isGroundedControl;
@@ -21,6 +23,8 @@ public class PlayerMovement : MonoBehaviour
 	private Animator anim;
 	private BoxCollider2D boxCollider;
 	private TrailRenderer trailRenderer;
+
+	private bool isLookingRight = true;
 
     [SerializeField] private float OriginalGravity;
     [SerializeField] private BoxCollider2D climb;
@@ -121,14 +125,23 @@ public class PlayerMovement : MonoBehaviour
 		float wallJumpClampedValue = Mathf.Clamp01(wallJumpPercentageComplete);
 
 		//Oyuncunun saða sola dönme animasyonu
-		if (body.velocity.x > 0.01f && !(isOnPlatform && isClimbing()))//platforma tutunduðunda hýzýyla tutunduðu yön her zaman ayný yönlü olmuyor.
+		/*if (body.velocity.x > 0.01f && !(isOnPlatform && isClimbing()))//platforma tutunduðunda hýzýyla tutunduðu yön her zaman ayný yönlü olmuyor.
         {
             transform.localScale = Vector3.one;
         }
         else if (body.velocity.x < -0.01f && !(isOnPlatform && isClimbing()))
         {
             transform.localScale = new Vector3(-1,1,1);
-        }
+        }*/
+
+		if (body.velocity.x > 0.01f && !isLookingRight && !(isOnPlatform && isClimbing()))//platforma tutunduðunda hýzýyla tutunduðu yön her zaman ayný yönlü olmuyor.
+		{
+			Flip();
+		}
+		else if (body.velocity.x < -0.01f && isLookingRight && !(isOnPlatform && isClimbing()))// Eðer sola gidiyorsa ve karakter saða bakýyorsa yönü deðiþtir
+		{
+			Flip();
+		}
 
 		acceleration = maxSpeed-Mathf.Abs(body.velocity.x);
         accelerationWallJump = maxSpeedWallJump-Mathf.Abs(body.velocity.x);
@@ -244,6 +257,10 @@ public class PlayerMovement : MonoBehaviour
 			}
 		}
 
+		if (body.velocity.y < 0 && isGrounded())//yere düþünce toz oluþturma
+		{
+			CreateDust();
+		}
 
 		if (onWall() && !isGrounded())
 		{
@@ -268,6 +285,17 @@ public class PlayerMovement : MonoBehaviour
 		WallJump();
 	}
 
+
+	private void Flip()
+	{
+		isLookingRight = !isLookingRight;
+
+		Vector3 scaler = transform.localScale;
+		scaler.x *= -1; //x eksenini çevirdik
+		transform.localScale = scaler;
+
+		if(isGrounded()) CreateDust();
+	}
 
     private void Jump()
     {
@@ -413,7 +441,8 @@ public class PlayerMovement : MonoBehaviour
         return (Input.GetKey(KeyCode.Mouse0) && onWall() && !isWallJumping);
     }
 
-    private void SpeedLimit()
+
+	private void SpeedLimit()
     {
         if (!isDashing)
         {
@@ -457,6 +486,11 @@ public class PlayerMovement : MonoBehaviour
 		if (isClimbing()) print("Týrmanýyor");
 		if (onWall()) print("Duvarda");
 		if (isGrounded()) print("Yerde"); //print(airTime);
+	}
+
+	void CreateDust()
+	{
+		Dust.Play();
 	}
 
 	private void OnTriggerEnter2D(Collider2D collision)
