@@ -1,33 +1,90 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Rendering;
 using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerMovement : MonoBehaviour
 {
+
+	public ParticleSystem Dust;
+	public float bounce;
+	public bool bouncing;
+    public bool isGroundedControl;
+
     public LayerMask groundLayer;
 	public LayerMask wallLayer;
-	public float speed;
+
+	public Rigidbody2D body;
+	private Animator anim;
+	private BoxCollider2D boxCollider;
+	private TrailRenderer trailRenderer;
+
+	private bool isLookingRight = true;
+
+    [SerializeField] private float OriginalGravity;
+    [SerializeField] private BoxCollider2D climb;
+    [SerializeField] private float maxSpeed;
+	[SerializeField] private float maxSpeedWallJump;
+	[SerializeField] private float acceleration;
+	[SerializeField] private float accelerationWallJump;
+
+    [SerializeField] private float verticalSpeedLimit;
+	[SerializeField] private float horizontalSpeedLimit;
+
+	[SerializeField] private float hýz;
+	[SerializeField] private float dikeyHýz;
 	public float jumpPower;
-	private Rigidbody2D body;
-    private Animator anim;
-    private BoxCollider2D boxCollider;
-    private TrailRenderer trailRenderer;
     private float horizontalInput;
     private float verticalInput;
-    private float jumpcount;
+    private float airJumpCounter;
+    private float groundJumpCounter;
     private float isGroundedCooldowntimer;
     private float timer;
     [SerializeField] float climbSpeed = 3f;
+    private bool doubleJump;
+
+    private float coyoteTimeCounter;
+    private float coyoteTime = 0.1f ;
+
+    private float jumpBufferTime = 0.1f;
+    private float jumpBufferCounter;
+ 
 
     //dash variables
-    [SerializeField] private float dashingVelocity;
-    [SerializeField] private float dashingTime;
-    private float dashingCooldown;
-    private Vector2 dashingDir;
-    private bool isDashing;
-    private bool canDash = true;
-    private bool canDashCondition;
+    [SerializeField] public float dashingCooldown;
+	private Vector2 dashDirection;
+	private bool isDashing = false;
+    [SerializeField] public bool canDashCondition;
+	[SerializeField] private float dashDistance = 5f;
+	[SerializeField] private float dashDuration = 0.2f;
+
+
+	//wall jump
+	public bool isWallJumping;
+    [SerializeField] Vector2 wallJumpPower;
+    private float wallJumpingCounter;
+    private float wallJumpExpecter;
+	private float wallJumpExpecterTime =0.05f;
+	IEnumerator wallJumpBounceCoroutine;
+    public float jumpPadSlownessCounter = 0f;
+	public float wallJumpSlownessCounter = 0f;
+	public float wallJumpFallTime;
+
+
+    private float airTime =0.54f;
+    //death
+    public bool dead;
+    public bool stuck;
+
+    //platform
+    public bool isOnPlatform;
+    public Rigidbody2D platformRb;
+	public CoinManager coinManager;
 
 
 	private void Awake()
@@ -37,177 +94,419 @@ public class PlayerMovement : MonoBehaviour
         anim = GetComponent<Animator>();
         boxCollider = GetComponent<BoxCollider2D>();
         trailRenderer = GetComponent<TrailRenderer>();
+		//jumpPad = GetComponent<JumpPad>();
+		Physics2D.queriesHitTriggers = false; // Trigger collider'larý yok sayar.
 	}
 
 	// Start is called before the first frame update
 	void Start()
     {
-		body.gravityScale = 5;
+		body.gravityScale = OriginalGravity;
         canDashCondition = true;
+        bouncing = false;
+        wallJumpBounceCoroutine = WallJumpBounce();
+		isWallJumping = false;
 	}
 
     // Update is called once per frame
     private void Update()
     {
+        
+        horizontalInput = Input.GetAxisRaw("Horizontal");
+        verticalInput = Input.GetAxisRaw("Vertical");
 
-        horizontalInput = Input.GetAxis("Horizontal");
-        verticalInput = Input.GetAxis("Vertical");
+		float percentageComplete = jumpPadSlownessCounter * 40 / (bounce);
+		float clampedValue = Mathf.Clamp01(percentageComplete);
+		//print(Mathf.Lerp(0.01f, 1f, percentageComplete));
+
+		if (isWallJumping) wallJumpSlownessCounter += Time.deltaTime;
+
+		float wallJumpPercentageComplete = wallJumpSlownessCounter;
+		float wallJumpClampedValue = Mathf.Clamp01(wallJumpPercentageComplete);
 
 		//Oyuncunun saða sola dönme animasyonu
-		if (horizontalInput > 0.01f)
+		/*if (body.velocity.x > 0.01f && !(isOnPlatform && isClimbing()))//platforma tutunduðunda hýzýyla tutunduðu yön her zaman ayný yönlü olmuyor.
         {
             transform.localScale = Vector3.one;
         }
-        else if (horizontalInput < -0.01f)
+        else if (body.velocity.x < -0.01f && !(isOnPlatform && isClimbing()))
         {
             transform.localScale = new Vector3(-1,1,1);
-        }
+        }*/
 
-        
-
-        //animatör parametrelerini ayarlama kýsmý
-        anim.SetBool("run",horizontalInput !=0 && isGrounded());
-        anim.SetBool("grounded", isGrounded());
-        anim.SetBool("jump", !isGrounded());
-        anim.SetBool("dash",whileDashing());
-
-         //   body.gravityScale = 5; //yer çekimi ayarlama
-
-
-        //dash atmazkenki hareket
-        if (!isDashing)
-        {
-			body.velocity = new Vector2(horizontalInput * speed, body.velocity.y); //sað sol hareket etme
+		if (body.velocity.x > 0.01f && !isLookingRight && !(isOnPlatform && isClimbing()))//platforma tutunduðunda hýzýyla tutunduðu yön her zaman ayný yönlü olmuyor.
+		{
+			Flip();
 		}
-        else if(isDashing)//dash atarkenki hareket
+		else if (body.velocity.x < -0.01f && isLookingRight && !(isOnPlatform && isClimbing()))// Eðer sola gidiyorsa ve karakter saða bakýyorsa yönü deðiþtir
+		{
+			Flip();
+		}
+
+		acceleration = maxSpeed-Mathf.Abs(body.velocity.x);
+        accelerationWallJump = maxSpeedWallJump-Mathf.Abs(body.velocity.x);
+		hýz = body.velocity.x;
+        dikeyHýz = body.velocity.y;
+        
+		if (horizontalInput == 0 && !isWallJumping && !isDashing && !bouncing && !isClimbing())//elini çekince durmayý saðlýyorrrrr
+		{
+            if (!isOnPlatform)
+            {
+				body.velocity = new Vector2(body.velocity.x / 100, body.velocity.y);//body.velocity.x 0 yapýlabilir. /100dü
+				if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+			}
+            else if (isOnPlatform)
+            {
+                body.velocity = new Vector2(platformRb.velocity.x, body.velocity.y);
+            }
+
+		}
+
+		
+		if (Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && ((horizontalInput * body.velocity.x > 0) || (horizontalInput * body.velocity.x == 0 && horizontalInput != 0)) && !bouncing && !isClimbing() && !isOnPlatform && !isDashing)
         {
-            body.velocity = new Vector2(0, 0);
-            body.velocity = new Vector2(dashingDir.x,dashingDir.y).normalized*dashingVelocity;
+            body.velocity = new Vector2(body.velocity.x + (acceleration * horizontalInput) / 4, body.velocity.y);
+        }
+        else if (horizontalInput * body.velocity.x < 0 && !isWallJumping && !bouncing && !isClimbing() && !isOnPlatform && !isDashing)
+        {
+            body.velocity = new Vector2(body.velocity.x - (body.velocity.x / 2), body.velocity.y);
+            if (body.velocity.x < 0.1f) body.velocity = new Vector2(0, body.velocity.y);
+        }
+		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0 && !isDashing)//jump pad hareketi
+		{//jumppadden sekip 
+			body.velocity = new Vector2(body.velocity.x + horizontalInput * Mathf.Lerp(0.01f, 2.5f, clampedValue), body.velocity.y);
+			print("Jumppad zýt");
+		}
+		else if (bouncing && !isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//jump pad hareketi
+        {
+            if (MathF.Abs(body.velocity.x) < 6)
+            {
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 1/2), body.velocity.y);
+                print("Jumppad ayný");
+			}
+		}
+		else if (bouncing && isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput < 0 && !isDashing)//wall jump hareketi
+		{
+			body.velocity = new Vector2(body.velocity.x + horizontalInput * Mathf.Lerp(0.01f, 2.5f, wallJumpClampedValue), body.velocity.y);
+			print("Walljump zýt");
+		}
+		else if (bouncing && isWallJumping && !isClimbing() && !isOnPlatform && body.velocity.x * horizontalInput >= 0 && !isDashing)//wall jump hareketi
+		{
+			if (MathF.Abs(body.velocity.x) < 6)
+			{
+				body.velocity = new Vector2(body.velocity.x + (horizontalInput * 1 / 2), body.velocity.y);
+				print("Walljump ayný");
+			}
+		}
+		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
+		{
+            body.velocity = new Vector2((horizontalInput * 10) + platformRb.velocity.x,body.velocity.y);
         }
 
 
 
-		if (Input.GetKeyDown(KeyCode.Space) && !onWall()) // zýplama
-			{ 
-                Jump();				
-			} 
+        if (isGroundedControl) print("Is grounded control true");
+        else print("Is grounded control false");
 
+	
+		if(!isDashing && !isClimbing())
+		{
+			body.gravityScale = OriginalGravity;
+		}
 
-        if (isGrounded()) //yere düþünce jumpcount sýfýrlama
-            {
-            // print("yerde");
-            if (jumpcount < 2) jumpcount = 1;      //sonra dön, ilk zýplayýþta jumpcount eksilmiyo. zýplayýnca yerden hemen ayrýlmadýðý için isgrounded jump countu sýfýrlýyo olabilir.
-
-			if (canDashCondition)  canDash = true;
-           
-            }
-
-            //dash
-            if (Input.GetKeyDown(KeyCode.Mouse1) && canDash && canDashCondition && dashingCooldown >1f)
-            {
-                Dash();
- 
-                StartCoroutine(StopDashing());
-            }
-        dashingCooldown += Time.deltaTime;
-
-
-       // if (onWall()) print("S");
-        if (Input.GetKey(KeyCode.Mouse0) && onWall())
-        {
-            Climb();
-        }
+		if (isGrounded()) //yere düþünce jumpcount sýfýrlama ve coyote time
+            { 
+            airJumpCounter = 1;
+            groundJumpCounter = 1;
+            coyoteTimeCounter = coyoteTime;
+            canDashCondition = true;
+            print("yerde");
+			if (isGroundedControl) bouncing = false;
+			if (isGroundedControl) isWallJumping = false;
+		}
         else
         {
-            body.gravityScale = 5;
+            coyoteTimeCounter -= Time.deltaTime;//coyote time hesaplayýcýsý
         }
+
+        if (onWall())
+        {
+			if (isGroundedControl) bouncing = false;//istenen süreden sonra duvara çarpýnca bouncing false oluyor
+			if (isGroundedControl) isWallJumping = false;
+		}
+
+        if (bouncing)
+        {
+            jumpPadSlownessCounter += Time.deltaTime;// þu anda bir iþe yaramýyor
+        }
+
+        dashingCooldown += Time.deltaTime;
+
+		if (!isDashing)//dash atarken hareket yönünü kitler
+		{
+			float horizontalInput = Input.GetAxisRaw("Horizontal");
+			float verticalInput = Input.GetAxisRaw("Vertical");
+			// Hareket yönünü hesapla
+			Vector2 inputDirection = new Vector2(horizontalInput, verticalInput).normalized;
+
+			// Sað týk ile Dash baþlat
+			if (inputDirection != Vector2.zero && Input.GetMouseButtonDown(1) && canDashCondition && dashingCooldown > 0.5f)// þu anda dashingcooldown'ý sýfýrlayan bir kod yok yani bir iþe yaramýyor
+			{
+				dashDirection = inputDirection; // Dash yönünü sabitle
+				StartCoroutine(Dash());
+			}
+		}
+
+		if (body.velocity.y < 0 && isGrounded())//yere düþünce toz oluþturma
+		{
+			CreateDust();
+		}
+
+		if (onWall() && !isGrounded())
+		{
+			wallJumpExpecter = wallJumpExpecterTime;
+			print("Expect");
+		}
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            jumpBufferCounter = jumpBufferTime;
+        }
+        else jumpBufferCounter -= Time.deltaTime;
+
+		wallJumpExpecter -= Time.deltaTime;
+
+        ConsoleDebugger();
+        Animasyon();
+        SpeedLimit();
+		Jump();
+		airTime -= Time.deltaTime;
+		Climb();
+		WallJump();
 	}
 
-    //zýplama kodu
+
+	private void Flip()
+	{
+		isLookingRight = !isLookingRight;
+
+		Vector3 scaler = transform.localScale;
+		scaler.x *= -1; //x eksenini çevirdik
+		transform.localScale = scaler;
+
+		if(isGrounded()) CreateDust();
+	}
+
     private void Jump()
     {
-        if (jumpcount > 0)
+
+		if (jumpBufferCounter > 0 && !isClimbing() && coyoteTimeCounter > 0 && groundJumpCounter > 0 && !isWallJumping)
+        {
+            airTime = 0.54f;
+            jumpBufferCounter = 0;
+			body.velocity = new Vector2(body.velocity.x, jumpPower);
+			if (isGroundedControl) bouncing = false;
+			if (isGroundedControl) isWallJumping = false;
+			groundJumpCounter--;
+		}
+
+		if (Input.GetKeyUp(KeyCode.Space) && airTime > 0 && !isDashing)//yerde zýpladýysa havada zýplamadýysa ve yukarý doðru gidiyorsa elini spaceden çekince hýzý yarýya düþecek
+		{
+			body.velocity = new Vector2(body.velocity.x, body.velocity.y / 2);
+		}
+
+		/*if (Input.GetKeyDown(KeyCode.Space) && !isClimbing() && coyoteTimeCounter <=0 && !isGrounded() && airJumpCounter > 0 && !isWallJumping)
         {
 			body.velocity = new Vector2(body.velocity.x, jumpPower);
-			jumpcount--;  
-        }
-    }
+            airJumpCounter--;
+		}*/
+	}
 
-    private void Dash()
-    {   
-            dashingCooldown = 0;
-            isDashing = true;
-            canDash = false;
-            canDashCondition = false;
-            trailRenderer.emitting = true;
-            anim.SetBool("dash",true);
-            dashingDir = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-			if (dashingDir == Vector2.zero)
-            {
-                dashingDir = new Vector2(transform.localScale.x, 0);
-                
-            }
-            else{
-                body.velocity = dashingDir.normalized*dashingVelocity;
-            }
-        
-    }
 
-    private IEnumerator StopDashing()
-    {
+	public IEnumerator Dash()
+	{
+        body.gravityScale = 0f;
+        body.velocity = Vector2.zero;
+		dashingCooldown = 0;
+		isWallJumping = false;
+		bouncing = false;
+		isDashing = true;
+		canDashCondition = false;
+		trailRenderer.emitting = true;
+		anim.SetBool("dash", true);
 
-		yield return new WaitForSeconds(dashingTime);
+		// Dash hýzýný hesapla
+		Vector2 dashVelocity = dashDirection * (dashDistance / dashDuration);
+		body.velocity = dashVelocity;    // Dash sýrasýnda hýzýný ayarla
+        yield return new WaitForSecondsRealtime(0.1f);
+		canDashCondition = false;//yerden dashle çýktýðý zaman dash hakký harcanmýyordu. Bu sayede harcanýyor.
+		yield return new WaitForSeconds(dashDuration-0.1f);
+
 		trailRenderer.emitting = false;
 		isDashing = false;
-        canDashCondition=true;
-        anim.SetBool("dash", false);  
-
+		anim.SetBool("dash", false);
+		//body.gravityScale = OriginalGravity;
 	}
 
-
-
-    //duvara týrmanma
     private void Climb()
     {
-		body.velocity = new Vector2(body.velocity.x, 0);
-		body.gravityScale = 0;
-		body.velocity = new Vector2 (body.velocity.x, verticalInput*climbSpeed);
 
-		/*if (Input.GetKeyDown(KeyCode.Space))
+        if (isClimbing() && !bouncing)
         {
-            body.velocity = new Vector2(-Mathf.Sign(transform.localRotation.x)*30,50);//YARDIM
-        }
-        */
+            if (Input.GetKey(KeyCode.Mouse0)) //  if (Input.GetKeyDown(KeyCode.Mouse0))
+			{
+				if (isGroundedControl) bouncing = false;
+				if (isGroundedControl) isWallJumping = false;
+				//body.velocity = new Vector2(0, 0);
+				body.gravityScale = 0;
 
+                if (!isOnPlatform) body.velocity = new Vector2(0, climbSpeed * verticalInput);//body.velocity = new Vector2(body.velocity.x, climbSpeed * verticalInput);
+                else if(isOnPlatform) body.velocity = new Vector2(platformRb.velocity.x, platformRb.velocity.y+climbSpeed * verticalInput);
+			}
+
+		}
+        else if (!isClimbing())
+        {
+            //body.gravityScale = OriginalGravity; gerekli mi testi yapýyorum
+        }
+    }
+
+
+
+    private void WallJump()
+    {
+        if ((/*wallJumpExpecter > 0 ||*/ isClimbing()) && Input.GetKeyDown(KeyCode.Space) && !isGrounded())
+        {
+			StopCoroutine(WallJumpBounce());
+			wallJumpBounceCoroutine = WallJumpBounce();
+			StartCoroutine(wallJumpBounceCoroutine);
+            //wallJumpExpecter = 0;
+			if (bouncing) print("iswalljumping:true");
+            else print("iswalljumping:false");
+        }
+    }
+
+
+	IEnumerator WallJumpBounce()
+	{
+		wallJumpSlownessCounter = 0.01f;
+		//jumpPadSlownessCounter = 0;
+		isWallJumping = true;
+		bouncing = true;//duvara çarptýðýnda yere düþtüðünde dash attýðýnda bouncing false olur.
+		body.AddForce(new Vector2(-wallJumpPower.x * transform.localScale.x, wallJumpPower.y), ForceMode2D.Impulse);
+		print("Walljumpbounce coroutine started");
+		isGroundedControl = false;		
+		yield return new WaitForSecondsRealtime(0.2f);
+		isGroundedControl = true;
+		yield return new WaitForSeconds(wallJumpFallTime);
+		bouncing = false;
+		isWallJumping = false;
 	}
+
+
 
 
     //yerde mi
     private bool isGrounded()
     {
-        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center,boxCollider.bounds.size,0,Vector2.down,0.1f,groundLayer);
+        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center,boxCollider.bounds.size*0.7f,0,Vector2.down,0.5f,groundLayer);
+
+      
         return raycastHit.collider != null;
     }
 
     //duvarda mý
 	private bool onWall()
 	{
-		RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x,0), 0.1f, groundLayer);//wall layer
+		RaycastHit2D raycastHit = Physics2D.BoxCast(climb.bounds.center, boxCollider.bounds.size*0.7f, 0, new Vector2(transform.localScale.x,0), 0.3f, groundLayer);//wall layer
 		return raycastHit.collider != null;
-
 	}
 
-    //saldýrý
-    public bool canAttack()
-    {
+	/*private void OnDrawGizmos()
+	{
+        Gizmos.DrawCube(climb.bounds.center, boxCollider.bounds.size * 0.5f);   //duvar kontrol
+	    Gizmos.DrawCube(climb.bounds.center + new Vector3(transform.localScale.x, 0, 0) * 0.5f, boxCollider.bounds.size * 0.5f);
 
-        return horizontalInput == 0 && isGrounded() && !onWall();
-    }
+       // Gizmos.DrawCube(boxCollider.bounds.center, boxCollider.bounds.size * 0.5f);  //zemin kontrol
+	   //Gizmos.DrawCube(boxCollider.bounds.center + new Vector3.down*0.5f, boxCollider.bounds.size * 0.5f);
+	}*/
 
     public bool whileDashing()
     {
         return isDashing;
     }
 
+    public bool isClimbing()
+    {
+        return (Input.GetKey(KeyCode.Mouse0) && onWall() && !isWallJumping);
+    }
 
+
+	private void SpeedLimit()
+    {
+        if (!isDashing)
+        {
+			if (body.velocity.y > verticalSpeedLimit)//hýz limiti
+			{
+				body.velocity = new Vector2(body.velocity.x, body.velocity.y - 1);
+			}
+			else if (body.velocity.y < -verticalSpeedLimit)
+			{
+				body.velocity = new Vector2(body.velocity.x, body.velocity.y + 1);
+			}
+
+			if (body.velocity.x > horizontalSpeedLimit)
+			{
+				body.velocity = new Vector2(body.velocity.x - 1, body.velocity.y);
+			}
+			else if (body.velocity.x < -horizontalSpeedLimit)
+			{
+				body.velocity = new Vector2(body.velocity.x + 1, body.velocity.y);
+			}
+		}
+	}
+
+    private void Animasyon()
+    {
+		//animatör parametrelerini ayarlama kýsmý
+		anim.SetBool("run", horizontalInput != 0 && isGrounded());
+		anim.SetBool("grounded", isGrounded());
+		anim.SetBool("jump", !isGrounded() && !isClimbing());
+		anim.SetBool("dash", whileDashing() && !dead);
+		anim.SetBool("climb", isClimbing() && verticalInput != 0 && !dead);
+		anim.SetBool("hang", isClimbing() && verticalInput == 0 && !dead);
+		anim.SetBool("dead", dead);
+	}
+
+    private void ConsoleDebugger()
+    {
+		if (bouncing) print("Bouncing");
+		if (isOnPlatform) print("Platform");
+		if (wallJumpingCounter == 0.01f) print("WallJump Bitti");
+		if (isClimbing()) print("Týrmanýyor");
+		if (onWall()) print("Duvarda");
+		if (isGrounded()) print("Yerde"); //print(airTime);
+	}
+
+	void CreateDust()
+	{
+		Dust.Play();
+	}
+
+	private void OnTriggerEnter2D(Collider2D collision)
+	{
+		if (collision.gameObject.CompareTag("Coin"))
+		{
+            Destroy(collision.gameObject);
+			coinManager.coinCount++;
+		}
+	}
+
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+        if (collision.gameObject.CompareTag("Stuck"))
+        {
+            stuck = true;
+        }
+	}
 }
