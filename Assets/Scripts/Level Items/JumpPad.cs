@@ -49,6 +49,7 @@ public class JumpPad : MonoBehaviour
 	{
 		if (collision.gameObject.CompareTag("Player"))
 		{
+			playerMovement.canDashCondition = true;
 			playerMovement.isWallJumping = false;
 			if (bounceCoroutine != null) StopCoroutine(bounceCoroutine);
 			bounceCoroutine = Bounce();
