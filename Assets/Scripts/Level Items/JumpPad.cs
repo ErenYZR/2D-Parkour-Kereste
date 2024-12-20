@@ -11,7 +11,7 @@ public class JumpPad : MonoBehaviour
 
 	public enum Direction
 	{
-		Up, Down, Left, Right, TopRight, TopLeft, TopSlightRight
+		Up, Down, Left, Right, TopRight, TopLeft, TopSlightRight, BottomRight, BottomLeft
 	}
 
 	[SerializeField] private Direction directionEnum;
@@ -71,7 +71,6 @@ public class JumpPad : MonoBehaviour
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1,0) * bounce, ForceMode2D.Impulse);
 					//collision.gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(1, 0) * bounce;
 					break;
-
 				case Direction.Left:
 					StartCoroutine(bounceCoroutine);
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.left * bounce, ForceMode2D.Impulse);
@@ -90,6 +89,16 @@ public class JumpPad : MonoBehaviour
 					StartCoroutine(bounceCoroutine);
 					body.velocity = Vector2.zero;
 					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1, 0.3f) * bounce, ForceMode2D.Impulse);
+					break;
+				case Direction.BottomRight:
+					StartCoroutine(bounceCoroutine);
+					body.velocity = Vector2.zero;
+					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(1, -1) * bounce, ForceMode2D.Impulse);
+					break;
+				case Direction.BottomLeft:
+					StartCoroutine(bounceCoroutine);
+					body.velocity = Vector2.zero;
+					collision.gameObject.GetComponent<Rigidbody2D>().AddForce(new Vector2(-1, -1) * bounce, ForceMode2D.Impulse);
 					break;
 			}
 								
