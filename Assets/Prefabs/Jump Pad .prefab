@@ -146,8 +146,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bounce: 70
   directionEnum: 0
-  player: {fileID: 0}
-  body: {fileID: 0}
+  player: {fileID: 798659794197940725, guid: d0b9101c06385fc4ba00eb5566f29f28, type: 3}
+  body: {fileID: 4551669224319264377, guid: d0b9101c06385fc4ba00eb5566f29f28, type: 3}
   fallTime: 0
   active: 0
 --- !u!95 &648515361225672613
