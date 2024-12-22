@@ -19,7 +19,7 @@ public class BreakablePlatform : MonoBehaviour
 
 	private void Update()
 	{
-		if(playerMovement.dead == true)
+		if(playerMovement.dead)
 		{
 			transform.localScale = Vector3.one;
 		}
