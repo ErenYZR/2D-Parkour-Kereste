@@ -49,8 +49,6 @@ public class JumpPad : MonoBehaviour
 	{
 		if (collision.gameObject.CompareTag("Player"))
 		{
-			playerMovement.canDashCondition = true;
-			playerMovement.isWallJumping = false;
 			if (bounceCoroutine != null) StopCoroutine(bounceCoroutine);
 			bounceCoroutine = Bounce();
 			switch (directionEnum)
@@ -121,4 +119,12 @@ public class JumpPad : MonoBehaviour
 		playerMovement.bouncing = false;
 	}
 
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+		if (collision.gameObject.CompareTag("Player"))
+		{
+			playerMovement.canDashCondition = true;
+			playerMovement.isWallJumping = false;
+		}
+	}
 }

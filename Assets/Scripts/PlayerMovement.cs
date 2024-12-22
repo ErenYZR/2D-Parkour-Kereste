@@ -62,6 +62,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] public bool canDashCondition;
 	[SerializeField] private float dashDistance = 5f;
 	[SerializeField] private float dashDuration = 0.2f;
+	public bool isInNoDashArea;
 
 
 	//wall jump
@@ -106,6 +107,7 @@ public class PlayerMovement : MonoBehaviour
         bouncing = false;
         wallJumpBounceCoroutine = WallJumpBounce();
 		isWallJumping = false;
+		isInNoDashArea = false;
 	}
 
     // Update is called once per frame
@@ -250,7 +252,7 @@ public class PlayerMovement : MonoBehaviour
 			Vector2 inputDirection = new Vector2(horizontalInput, verticalInput).normalized;
 
 			// Sað týk ile Dash baþlat
-			if (inputDirection != Vector2.zero && Input.GetMouseButtonDown(1) && canDashCondition && dashingCooldown > 0.5f)// þu anda dashingcooldown'ý sýfýrlayan bir kod yok yani bir iþe yaramýyor
+			if (inputDirection != Vector2.zero && Input.GetMouseButtonDown(1) && canDashCondition && dashingCooldown > 0.5f && !isInNoDashArea)// þu anda dashingcooldown'ý sýfýrlayan bir kod yok yani bir iþe yaramýyor
 			{
 				dashDirection = inputDirection; // Dash yönünü sabitle
 				StartCoroutine(Dash());
