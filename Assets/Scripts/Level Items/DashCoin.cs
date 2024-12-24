@@ -26,9 +26,17 @@ public class DashCoin : MonoBehaviour
 	{
 		if (collision.transform.tag == "Player")
 		{
-			transform.localScale = Vector3.zero;
-			playerMovement.canDashCondition = true;
-			playerMovement.dashingCooldown = 1f;
+			StartCoroutine(TurningBack());
 		}
+	}
+
+	private IEnumerator TurningBack()
+	{
+		transform.localScale = Vector3.zero;
+		playerMovement.canDashCondition = true;
+		playerMovement.dashingCooldown = 1f;
+		yield return new WaitForSeconds(delay);
+		transform.localScale = Vector3.one;
+
 	}
 }
