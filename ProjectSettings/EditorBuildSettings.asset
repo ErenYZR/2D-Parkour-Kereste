@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/Main Menu.unity
+    path: Assets/Scenes/Fake Menu.unity
     guid: c1bef5693f84f6a45bee81df0c517864
   - enabled: 0
     path: Assets/Scenes/erenscene.unity
