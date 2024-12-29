@@ -21,7 +21,7 @@ public class Respawn : MonoBehaviour
 	}
 	private void Update()
 	{
-		if(playerMovement.stuck == true)
+		if(playerMovement.stuck == true || Input.GetKeyDown(KeyCode.R))
 		{
 			Die();
 		}
