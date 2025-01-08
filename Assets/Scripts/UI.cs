@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class UI : MonoBehaviour
 {
-    public Text text;
+    [SerializeField] TextMeshProUGUI text;
     private float timer;
 
     // Start is called before the first frame update
