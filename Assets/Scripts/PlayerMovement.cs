@@ -326,6 +326,8 @@ public class PlayerMovement : MonoBehaviour
 
 	public IEnumerator Dash()
 	{
+		CameraShake.Instance.ShakeCamera(2f,0.05f);//kamera sallantýsý (kuvvet,süre)
+
         body.gravityScale = 0f;
         body.velocity = Vector2.zero;
 		dashingCooldown = 0;
