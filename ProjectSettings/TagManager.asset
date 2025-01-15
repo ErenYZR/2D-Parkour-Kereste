@@ -58,6 +58,9 @@ TagManager:
   - name: Player
     uniqueID: 529811319
     locked: 0
+  - name: Spike
+    uniqueID: 2691137309
+    locked: 0
   - name: Wall
     uniqueID: 3257714533
     locked: 0
@@ -69,7 +72,4 @@ TagManager:
     locked: 0
   - name: Wall
     uniqueID: 2782154563
-    locked: 0
-  - name: Spike
-    uniqueID: 2691137309
     locked: 0
