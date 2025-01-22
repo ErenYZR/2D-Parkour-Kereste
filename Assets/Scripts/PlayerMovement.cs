@@ -11,6 +11,8 @@ public class PlayerMovement : MonoBehaviour
 {
 
 	public ParticleSystem Dust;
+	public ParticleSystem DashParticle;
+	public ParticleSystem DashDust;
 	public float bounce;
 	public bool bouncing;
     public bool isGroundedControl;
@@ -337,6 +339,8 @@ public class PlayerMovement : MonoBehaviour
 		canDashCondition = false;
 		trailRenderer.emitting = true;
 		anim.SetBool("dash", true);
+		DashParticle.Play();
+		DashDust.Play();
 
 		// Dash hýzýný hesapla
 		Vector2 dashVelocity = dashDirection * (dashDistance / dashDuration);
@@ -495,6 +499,8 @@ public class PlayerMovement : MonoBehaviour
 	{
 		Dust.Play();
 	}
+
+
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{

@@ -35,7 +35,10 @@ public class DashCoin : MonoBehaviour
 		transform.localScale = Vector3.zero;
 		playerMovement.canDashCondition = true;
 		playerMovement.dashingCooldown = 1f;
-		yield return new WaitForSeconds(delay);
+		Time.timeScale = 0.75f;
+		yield return new WaitForSeconds(0.06f);
+		Time.timeScale = 1f;
+		yield return new WaitForSeconds(delay-0.1f);
 		transform.localScale = Vector3.one;
 
 	}
