@@ -6,11 +6,15 @@ using TMPro;
 
 public class UI : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI text;
-    private float timer;
+    [SerializeField] TextMeshProUGUI timerText;
+    public float timer { get; private set; }
 
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] TextMeshProUGUI highScoreText;
+    [SerializeField] FinishFlag finishFlag;
+
+
+	// Start is called before the first frame update
+	void Start()
     {
         
     }
@@ -19,6 +23,7 @@ public class UI : MonoBehaviour
     void Update()
     {
         timer += Time.deltaTime;
-        text.text = timer.ToString("#0.00");
+        timerText.text = timer.ToString("#0.00");
+        highScoreText.text = "Your Score: " +finishFlag.highScore.ToString();
     }
 }
