@@ -7,12 +7,14 @@ public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseMenu;
     public GameObject endMenu;
+    public GameObject highScoresMenu;
     public static bool isPaused;
     // Start is called before the first frame update
     void Start()
     {
         pauseMenu.SetActive(false);
         endMenu.SetActive(false);
+        highScoresMenu.SetActive(false);
     }
 
     // Update is called once per frame
@@ -58,4 +60,11 @@ public class PauseMenu : MonoBehaviour
 		Time.timeScale = 0;
 		isPaused = true;
 	}
+
+    public void HighScoresMenu()
+    {
+        endMenu.SetActive(false);
+        highScoresMenu.SetActive(true);
+    }
+
 }

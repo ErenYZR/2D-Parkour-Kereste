@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class FinishFlag : MonoBehaviour
 {
@@ -11,9 +12,17 @@ public class FinishFlag : MonoBehaviour
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
-        highScore = ui.timer;
-		pauseMenu.EndGame();
-		Time.timeScale = 0;
-		print(highScore);
+		if (collision.CompareTag("Player"))
+		{
+			highScore = ui.timer;
+			HighScoreManager.SaveTime(highScore);
+			pauseMenu.EndGame();
+			Time.timeScale = 0;
+		}
+	}
+
+	[Serializable] public class HighScoreData
+	{
+		public List<float> scores = new List<float>();//skor listesi
 	}
 }
