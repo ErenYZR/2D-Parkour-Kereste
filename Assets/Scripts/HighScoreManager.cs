@@ -8,7 +8,7 @@ public class HighScoreManager : MonoBehaviour
 {
 	[SerializeField] public TextMeshProUGUI firstScore;
 
-	private static string savePath => Application.dataPath + "/JsonSave/highscores.json";
+	private static string savePath => Application.persistentDataPath + "/highscores.json";
 
 	public static void SaveTime(float newTime)
 	{

@@ -16,7 +16,7 @@ public class ScoreboardUI : MonoBehaviour
 	{
 		HighScoreData highScores = HighScoreManager.LoadHighScores();
 
-		scoreText.text = "High Scores:\n";
+		scoreText.text = "";
 		for (int i = 0; i < highScores.scores.Count; i++)
 		{
 			scoreText.text += (i + 1) + ". " + highScores.scores[i].ToString("F2") + "s\n";

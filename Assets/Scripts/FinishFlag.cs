@@ -8,6 +8,7 @@ public class FinishFlag : MonoBehaviour
     [SerializeField] PauseMenu pauseMenu;
     [SerializeField] UI ui;
     public float highScore;
+	public ScoreboardUI scoreboardui;
 
 
 	private void OnTriggerEnter2D(Collider2D collision)
@@ -18,6 +19,7 @@ public class FinishFlag : MonoBehaviour
 			HighScoreManager.SaveTime(highScore);
 			pauseMenu.EndGame();
 			Time.timeScale = 0;
+			scoreboardui.ShowHighScores();
 		}
 	}
 
