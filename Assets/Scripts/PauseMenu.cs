@@ -13,7 +13,7 @@ public class PauseMenu : MonoBehaviour
     void Start()
     {
         pauseMenu.SetActive(false);
-        endMenu.SetActive(false);
+        //endMenu.SetActive(false);
         highScoresMenu.SetActive(false);
     }
 
@@ -59,6 +59,7 @@ public class PauseMenu : MonoBehaviour
 		endMenu.SetActive(true);
 		Time.timeScale = 0;
 		isPaused = true;
+        highScoresMenu.SetActive(false);
 	}
 
     public void HighScoresMenu()

@@ -75,6 +75,7 @@ public class MovingPlatform : MonoBehaviour
 		if (collision.CompareTag("Player"))
 		{
 			playerMovement.isOnPlatform = false;
+			playerMovement.platformRb = null;
 		}
 	}
 }

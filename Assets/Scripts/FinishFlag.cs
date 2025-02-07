@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using TMPro;
 
 public class FinishFlag : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class FinishFlag : MonoBehaviour
     [SerializeField] UI ui;
     public float highScore;
 	public ScoreboardUI scoreboardui;
+	[SerializeField] TextMeshProUGUI highScoreText;
 
 
 	private void OnTriggerEnter2D(Collider2D collision)
@@ -20,6 +22,8 @@ public class FinishFlag : MonoBehaviour
 			pauseMenu.EndGame();
 			Time.timeScale = 0;
 			scoreboardui.ShowHighScores();
+			highScoreText.text = "Your Score: " + highScore.ToString("F2");
+			print(highScoreText.text);
 		}
 	}
 

@@ -18,6 +18,6 @@ public class UI : MonoBehaviour
     {
         timer += Time.deltaTime;
         timerText.text = timer.ToString("#0.00");
-        highScoreText.text = "Your Score: " +finishFlag.highScore.ToString();
+       // highScoreText.text = "Your Score: " + finishFlag.highScore.ToString();
     }
 }

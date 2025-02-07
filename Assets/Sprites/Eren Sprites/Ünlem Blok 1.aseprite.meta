@@ -155,9 +155,24 @@ ScriptedImporter:
       height: 16
     spriteID: 558aec50b53cffa45a0b69a0709db9b0
     spriteBone: []
-    spriteOutline: []
+    spriteOutline:
+    - outline:
+      - {x: -8, y: -8}
+      - {x: -8, y: 8}
+      - {x: 8, y: 8}
+      - {x: 8, y: -8}
+    - outline:
+      - {x: -8, y: -8}
+      - {x: -8, y: 8}
+      - {x: 8, y: 8}
+      - {x: 8, y: -8}
     vertices: []
-    spritePhysicsOutline: []
+    spritePhysicsOutline:
+    - outline:
+      - {x: -7, y: -7}
+      - {x: -7, y: 7}
+      - {x: 7, y: 7}
+      - {x: 7, y: -7}
     indices: 
     edges: []
     tessellationDetail: 0

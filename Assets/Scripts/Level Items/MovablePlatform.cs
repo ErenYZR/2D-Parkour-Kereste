@@ -63,6 +63,12 @@ public class MovablePlatform : MonoBehaviour
 		{
 			rb.velocity = Vector2.zero;
 		}
+
+		if (playerMovement.dead)//karakter ölünce sýfýrlanma kodu
+		{
+			transform.position = PosA.position;
+			targetPos = PosB.position;
+		}
 	}
 
 	void DirectionCalculate()
@@ -74,7 +80,7 @@ public class MovablePlatform : MonoBehaviour
 	{
 		if (collision.CompareTag("Player"))
 		{
-			playerMovement.isOnPlatform = true;
+			//playerMovement.isOnPlatform = true;
 			playerMovement.platformRb = rb;
 			onPlatform = true;
 		}
@@ -84,14 +90,14 @@ public class MovablePlatform : MonoBehaviour
 	{
 		if (collision.CompareTag("Player"))
 		{
-			playerMovement.isOnPlatform = false;
+			//playerMovement.isOnPlatform = false;
 			onPlatform = false;
 		}
 	}
 	
 IEnumerator Move()
 	{
-		yield return new WaitForSecondsRealtime(0.5f);
+		yield return new WaitForSecondsRealtime(0.3f);
 		rb.velocity = moveDirection * speed;
 	}
 
@@ -104,6 +110,6 @@ IEnumerator Move()
 	public bool samePosition()
 	{
 		//return rb.transform.position == PosA.transform.position;
-		return (Vector2.Distance(transform.position, PosA.position) < 0.1f);
+		return (Vector2.Distance(transform.position, PosA.position) < 0.2f);
 	}
 }

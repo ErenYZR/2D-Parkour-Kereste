@@ -201,7 +201,7 @@ public class PlayerMovement : MonoBehaviour
 				print("Walljump ayný");
 			}
 		}
-		else if (isOnPlatform && Mathf.Abs(body.velocity.x) < maxSpeed && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
+		else if (isOnPlatform && !isWallJumping && !bouncing && !isClimbing() && !isDashing)
 		{
             body.velocity = new Vector2((horizontalInput * 10) + platformRb.velocity.x,body.velocity.y);
         }
