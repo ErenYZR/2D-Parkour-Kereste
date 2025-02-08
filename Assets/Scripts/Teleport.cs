@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Teleport : MonoBehaviour
@@ -7,13 +8,26 @@ public class Teleport : MonoBehaviour
 	[SerializeField] GameObject player;
     [SerializeField] Transform teleportPoint;
 	[SerializeField] Animator levelTransitionAnim;
+	[SerializeField] TextMeshProUGUI levelNumberText;
 
+	static int number;
+
+	private void Start()
+	{
+		number = 1;
+	}
+
+	private void Update()
+	{
+		levelNumberText.text ="Level:" +number + "/6";
+	}
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
 		if(collision.gameObject.tag == "Player")
         {
-			StartCoroutine(LevelTeleport());           
+			StartCoroutine(LevelTeleport());
+			number++;
         }
 	}
 	

@@ -5,7 +5,7 @@ using UnityEngine;
 public class MovablePlatform : MonoBehaviour
 {
 	[SerializeField] Transform PosA, PosB;
-	[SerializeField] int speed;
+	[SerializeField] float speed;
 	Vector3 targetPos;
 	private bool onPlatform;
 
@@ -97,7 +97,7 @@ public class MovablePlatform : MonoBehaviour
 	
 IEnumerator Move()
 	{
-		yield return new WaitForSecondsRealtime(0.3f);
+		yield return new WaitForSecondsRealtime(0.2f);
 		rb.velocity = moveDirection * speed;
 	}
 
