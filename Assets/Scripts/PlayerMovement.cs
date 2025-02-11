@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 //using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 //using UnityEngine.Rendering;
 //using static UnityEngine.EventSystems.EventTrigger;
 
@@ -88,6 +90,11 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D platformRb;
 	public CoinManager coinManager;
 
+	public InputActionReference move;
+	private Vector2 moveDirection;
+
+	public InputActionReference jump;
+
 
 	private void Awake()
 	{
@@ -114,9 +121,14 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
+
+		/*moveDirection = move.action.ReadValue<Vector2>();//yeni input sistemi
+
+		horizontalInput = moveDirection.x;
+		verticalInput = moveDirection.y;*/
+
+		horizontalInput = Input.GetAxisRaw("Horizontal");
+		verticalInput = Input.GetAxisRaw("Vertical");
 
 		float percentageComplete = jumpPadSlownessCounter * 40 / (bounce);
 		float clampedValue = Mathf.Clamp01(percentageComplete);
@@ -517,5 +529,20 @@ public class PlayerMovement : MonoBehaviour
         {
             stuck = true;
         }
+	}
+
+	private void OnEnable()
+	{
+		jump.action.started += A;
+	}
+
+	private void OnDisable()
+	{
+		jump.action.started -= A;
+	}
+
+	private void A(InputAction.CallbackContext context)
+	{
+		
 	}
 }
